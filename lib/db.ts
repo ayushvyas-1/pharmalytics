@@ -219,7 +219,99 @@ const getInitialData = (): Database => {
     })
   })
 
-  // No sample sessions or analytics - start fresh
+  // --- Start: Add Sample Sessions and Analytics for Demonstration ---
+  const now = new Date();
+  const threeHoursAgo = new Date(now.getTime() - 3 * 60 * 60 * 1000).toISOString();
+  const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString();
+  const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+  // Sample Session 1: Dr. Sarah Smith with Cardiomax
+  const session1Id = uuidv4();
+  initialData.sessions.push({
+    id: session1Id,
+    doctorId: doctorId1,
+    presentationId: PRESENTATION_1_ID,
+    startTime: threeHoursAgo,
+    endTime: new Date().toISOString(),
+    totalTime: 300, // 5 minutes
+    avgEngagement: 85,
+  });
+
+  // Sample Slide Analytics for Session 1
+  initialData.slideAnalytics.push(
+    { id: uuidv4(), sessionId: session1Id, slideId: "slide-1-0", timeSpent: 20000 }, // 20 seconds
+    { id: uuidv4(), sessionId: session1Id, slideId: "slide-1-1", timeSpent: 15000 }, // 15 seconds
+    { id: uuidv4(), sessionId: session1Id, slideId: "slide-1-2", timeSpent: 10000 }, // 10 seconds
+    { id: uuidv4(), sessionId: session1Id, slideId: "slide-1-3", timeSpent: 5000 },  // 5 seconds
+    { id: uuidv4(), sessionId: session1Id, slideId: "slide-1-4", timeSpent: 12000 }, // 12 seconds
+    { id: uuidv4(), sessionId: session1Id, slideId: "slide-1-5", timeSpent: 8000 }  // 8 seconds
+  );
+
+  // Update doctor and presentation stats for Sample Session 1
+  const doctor1 = initialData.doctors.find(d => d.id === doctorId1);
+  if (doctor1) {
+      doctor1.sessions += 1;
+      doctor1.lastSession = new Date().toISOString();
+      doctor1.avgEngagement = Math.round((doctor1.avgEngagement * (doctor1.sessions - 1) + 85) / doctor1.sessions);
+      const currentTotalMinutes = Number.parseInt(doctor1.totalTime.split("h")[0] || "0") * 60 +
+          Number.parseInt(doctor1.totalTime.split("h ")[1]?.split("m")[0] || "0");
+      const totalMinutes = Math.round(currentTotalMinutes + 300 / 60);
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      doctor1.totalTime = `${hours}h ${minutes}m`;
+  }
+  const presentation1 = initialData.presentations.find(p => p.id === PRESENTATION_1_ID);
+  if (presentation1) {
+      presentation1.sessions += 1;
+      presentation1.lastUsed = new Date().toISOString();
+      presentation1.avgEngagement = Math.round((presentation1.avgEngagement * (presentation1.sessions - 1) + 85) / presentation1.sessions);
+  }
+
+
+  // Sample Session 2: Dr. Michael Johnson with Glucobalance
+  const session2Id = uuidv4();
+  initialData.sessions.push({
+    id: session2Id,
+    doctorId: doctorId2,
+    presentationId: PRESENTATION_2_ID,
+    startTime: twoDaysAgo,
+    endTime: new Date().toISOString(),
+    totalTime: 450, // 7.5 minutes
+    avgEngagement: 70,
+  });
+
+  // Sample Slide Analytics for Session 2
+  initialData.slideAnalytics.push(
+    { id: uuidv4(), sessionId: session2Id, slideId: "slide-2-0", timeSpent: 30000 },
+    { id: uuidv4(), sessionId: session2Id, slideId: "slide-2-1", timeSpent: 20000 },
+    { id: uuidv4(), sessionId: session2Id, slideId: "slide-2-2", timeSpent: 10000 },
+    { id: uuidv4(), sessionId: session2Id, slideId: "slide-2-3", timeSpent: 5000 },
+    { id: uuidv4(), sessionId: session2Id, slideId: "slide-2-4", timeSpent: 18000 },
+    { id: uuidv4(), sessionId: session2Id, slideId: "slide-2-5", timeSpent: 12000 }
+  );
+
+  // Update doctor and presentation stats for Sample Session 2
+  const doctor2 = initialData.doctors.find(d => d.id === doctorId2);
+  if (doctor2) {
+      doctor2.sessions += 1;
+      doctor2.lastSession = new Date().toISOString();
+      doctor2.avgEngagement = Math.round((doctor2.avgEngagement * (doctor2.sessions - 1) + 70) / doctor2.sessions);
+      const currentTotalMinutes = Number.parseInt(doctor2.totalTime.split("h")[0] || "0") * 60 +
+          Number.parseInt(doctor2.totalTime.split("h ")[1]?.split("m")[0] || "0");
+      const totalMinutes = Math.round(currentTotalMinutes + 450 / 60);
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+      doctor2.totalTime = `${hours}h ${minutes}m`;
+  }
+  const presentation2 = initialData.presentations.find(p => p.id === PRESENTATION_2_ID);
+  if (presentation2) {
+      presentation2.sessions += 1;
+      presentation2.lastUsed = new Date().toISOString();
+      presentation2.avgEngagement = Math.round((presentation2.avgEngagement * (presentation2.sessions - 1) + 70) / presentation2.sessions);
+  }
+
+  // --- End: Add Sample Sessions and Analytics for Demonstration ---
+
   return initialData
 }
 
@@ -302,6 +394,10 @@ export function startSession(doctorId: string, presentationId: string): Session 
   }
   db.sessions.push(newSession)
   saveDatabase(db)
+  
+  console.log("DB: Session started:", newSession)
+  console.log("DB: Total sessions in database:", db.sessions.length)
+  
   return newSession
 }
 
@@ -309,15 +405,13 @@ export function endSession(sessionId: string, slideAnalytics: Omit<SlideAnalytic
   const db = getDatabase()
   const session = db.sessions.find((s) => s.id === sessionId)
 
-  console.log("DB: Finding session with ID:", sessionId)
-  console.log(
-    "DB: Available sessions:",
-    db.sessions.map((s) => ({ id: s.id, doctorId: s.doctorId })),
-  )
+  console.log("DB: Ending session with ID:", sessionId)
+  console.log("DB: Available sessions:", db.sessions.map((s) => ({ id: s.id, doctorId: s.doctorId })))
   console.log("DB: Found session:", session)
   console.log("DB: Received slide analytics:", slideAnalytics)
 
   if (!session) {
+    console.error("DB: Session not found with ID:", sessionId)
     throw new Error("Session not found")
   }
 
@@ -342,11 +436,10 @@ export function endSession(sessionId: string, slideAnalytics: Omit<SlideAnalytic
   db.slideAnalytics.push(...newSlideAnalytics)
 
   console.log("DB: Total slide analytics in database:", db.slideAnalytics.length)
-  console.log("DB: All slide analytics:", db.slideAnalytics)
 
   // Calculate average engagement
   const totalTimeSpent = newSlideAnalytics.reduce((sum, analytic) => sum + analytic.timeSpent, 0)
-  session.avgEngagement = Math.round((totalTimeSpent / (session.totalTime * 1000)) * 100)
+  session.avgEngagement = session.totalTime > 0 ? Math.round((totalTimeSpent / (session.totalTime * 1000)) * 100) : 0
 
   console.log("DB: Calculated engagement:", session.avgEngagement)
 
@@ -363,12 +456,10 @@ export function endSession(sessionId: string, slideAnalytics: Omit<SlideAnalytic
     )
 
     // Update total time (simplified for demo)
-    const totalMinutes = Math.round(
-      Number.parseInt(doctor.totalTime.split("h")[0] || "0") * 60 +
-        Number.parseInt(doctor.totalTime.split("h ")[1]?.split("m")[0] || "0") +
-        session.totalTime / 60,
-    )
-
+    const currentTotalMinutes = Number.parseInt(doctor.totalTime.split("h")[0] || "0") * 60 +
+      Number.parseInt(doctor.totalTime.split("h ")[1]?.split("m")[0] || "0")
+    
+    const totalMinutes = Math.round(currentTotalMinutes + (session.totalTime || 0) / 60)
     const hours = Math.floor(totalMinutes / 60)
     const minutes = totalMinutes % 60
     doctor.totalTime = `${hours}h ${minutes}m`
@@ -424,6 +515,14 @@ export function getTopPerformingSlides(
 ): { slide: Slide; avgTimeSpent: number; views: number; totalTimeSpent: number }[] {
   const db = getDatabase()
 
+  console.log("DB: Getting top performing slides")
+  console.log("DB: Total slide analytics:", db.slideAnalytics.length)
+
+  if (db.slideAnalytics.length === 0) {
+    console.log("DB: No slide analytics found")
+    return []
+  }
+
   // Group analytics by slide
   const slideStats = new Map<string, { timeSpent: number; count: number }>()
 
@@ -435,11 +534,16 @@ export function getTopPerformingSlides(
     })
   })
 
+  console.log("DB: Slide stats map:", Array.from(slideStats.entries()))
+
   // Convert map to array and join with slide data
   const result = Array.from(slideStats.entries())
     .map(([slideId, stats]) => {
       const slide = db.slides.find((s) => s.id === slideId)
-      if (!slide) return null
+      if (!slide) {
+        console.warn("DB: Slide not found for ID:", slideId)
+        return null
+      }
 
       return {
         slide,
@@ -448,10 +552,11 @@ export function getTopPerformingSlides(
         views: stats.count,
       }
     })
-    .filter(Boolean)
-    .sort((a, b) => b!.avgTimeSpent - a!.avgTimeSpent)
-    .slice(0, limit) as { slide: Slide; avgTimeSpent: number; views: number; totalTimeSpent: number }[]
+    .filter((item): item is NonNullable<typeof item> => item !== null)
+    .sort((a, b) => b.avgTimeSpent - a.avgTimeSpent)
+    .slice(0, limit)
 
+  console.log("DB: Top performing slides result:", result)
   return result
 }
 
@@ -464,13 +569,29 @@ export function getRecentSessions(limit = 5): Array<{
 }> {
   const db = getDatabase()
 
-  return db.sessions
-    .filter((session) => session.endTime) // Only completed sessions
+  console.log("DB: Getting recent sessions")
+  console.log("DB: Total sessions:", db.sessions.length)
+  console.log("DB: Sessions with endTime:", db.sessions.filter(s => s.endTime).length)
+
+  const completedSessions = db.sessions.filter((session) => session.endTime)
+  
+  if (completedSessions.length === 0) {
+    console.log("DB: No completed sessions found")
+    return []
+  }
+
+  const result = completedSessions
     .sort((a, b) => new Date(b.endTime!).getTime() - new Date(a.endTime!).getTime())
     .slice(0, limit)
     .map((session) => {
-      const doctor = db.doctors.find((d) => d.id === session.doctorId)!
-      const presentation = db.presentations.find((p) => p.id === session.presentationId)!
+      const doctor = db.doctors.find((d) => d.id === session.doctorId)
+      const presentation = db.presentations.find((p) => p.id === session.presentationId)
+      
+      if (!doctor || !presentation) {
+        console.warn('DB: Missing doctor or presentation for session:', session.id)
+        return null
+      }
+      
       const analytics = db.slideAnalytics.filter((a) => a.sessionId === session.id)
 
       return {
@@ -481,6 +602,10 @@ export function getRecentSessions(limit = 5): Array<{
         duration: session.totalTime || 0,
       }
     })
+    .filter((item): item is NonNullable<typeof item> => item !== null)
+
+  console.log("DB: Recent sessions result:", result)
+  return result
 }
 
 export function formatTime(seconds: number): string {
@@ -564,5 +689,6 @@ export function getSlideAnalytics(slideId: string): SlideAnalytic[] {
 // Get all slide analytics
 export function getAllSlideAnalytics(): SlideAnalytic[] {
   const db = getDatabase()
+  console.log("DB: Getting all slide analytics, count:", db.slideAnalytics.length)
   return db.slideAnalytics
 }
