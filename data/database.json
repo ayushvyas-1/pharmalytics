@@ -154,6 +154,12 @@
       "endTime": "2025-06-17T03:54:49.293Z",
       "totalTime": 24.33,
       "avgEngagement": 99
+    },
+    {
+      "id": "6cea2bc9-7c73-4179-b859-41500fdea301",
+      "doctorId": "doctor-1",
+      "presentationId": "presentation-1",
+      "startTime": "2025-06-17T04:35:46.740Z"
     }
   ],
   "slideAnalytics": [
