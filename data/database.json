@@ -6,11 +6,11 @@
       "specialty": "Cardiology",
       "email": "sarah.smith@hospital.com",
       "phone": "+1 (555) 123-4567",
-      "sessions": 2,
-      "avgEngagement": 99,
+      "sessions": 3,
+      "avgEngagement": 100,
       "totalTime": "0h 1m",
       "status": "active",
-      "lastSession": "2025-06-17T04:36:03.080Z"
+      "lastSession": "2025-06-17T04:36:10.099Z"
     },
     {
       "id": "doctor-2",
@@ -30,11 +30,11 @@
       "title": "Cardiomax Treatment Protocol",
       "description": "New cardiovascular medication protocol for hypertension patients",
       "slides": 6,
-      "sessions": 2,
-      "avgEngagement": 99,
+      "sessions": 3,
+      "avgEngagement": 100,
       "status": "active",
       "createdAt": "2025-06-17T03:54:24.962Z",
-      "lastUsed": "2025-06-17T04:36:03.080Z"
+      "lastUsed": "2025-06-17T04:36:10.099Z"
     },
     {
       "id": "presentation-2",
@@ -160,9 +160,9 @@
       "doctorId": "doctor-1",
       "presentationId": "presentation-1",
       "startTime": "2025-06-17T04:35:46.740Z",
-      "endTime": "2025-06-17T04:36:03.080Z",
-      "totalTime": 16.34,
-      "avgEngagement": 98
+      "endTime": "2025-06-17T04:36:10.099Z",
+      "totalTime": 23.359,
+      "avgEngagement": 100
     }
   ],
   "slideAnalytics": [
@@ -237,6 +237,42 @@
       "slideId": "slide-1-5",
       "timeSpent": 1747,
       "id": "ae1fbcdc-9db1-4c50-adbf-1e4ca0203ff0"
+    },
+    {
+      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
+      "slideId": "slide-1-0",
+      "timeSpent": 1774,
+      "id": "808577d9-a452-4596-91be-8f148bc868da"
+    },
+    {
+      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
+      "slideId": "slide-1-1",
+      "timeSpent": 2601,
+      "id": "4cc092f8-ca74-4887-82c4-6902de7f7afe"
+    },
+    {
+      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
+      "slideId": "slide-1-2",
+      "timeSpent": 3950,
+      "id": "507cef92-d47f-4375-aaf6-4b248eeb842b"
+    },
+    {
+      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
+      "slideId": "slide-1-3",
+      "timeSpent": 5027,
+      "id": "a924c6d3-1ef8-4cd8-bebe-a3e575e230cf"
+    },
+    {
+      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
+      "slideId": "slide-1-4",
+      "timeSpent": 968,
+      "id": "42f5c75a-cf87-4c63-b46e-048455a07eb1"
+    },
+    {
+      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
+      "slideId": "slide-1-5",
+      "timeSpent": 10307,
+      "id": "073d3d46-4f8b-4467-a361-7f24579e57e4"
     }
   ]
 }
