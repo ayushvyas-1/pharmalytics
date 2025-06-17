@@ -1,19 +1,70 @@
+"use client"
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Users, Presentation, Play, BarChart3 } from "lucide-react"
-import { getDoctors, getPresentations } from "@/lib/db"
+import { Doctor, Presentation as PresentationType } from "@/lib/db"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { getRecentSessions } from "@/lib/db"
+import { useEffect, useState } from "react"
+
+// Server actions
+async function getDashboardData() {
+  const response = await fetch('/api/dashboard')
+  if (!response.ok) {
+    throw new Error('Failed to fetch dashboard data')
+  }
+  return response.json()
+}
 
 export default function Dashboard() {
-  const doctors = getDoctors()
-  const presentations = getPresentations()
-  const recentSessions = getRecentSessions(4)
+  const [doctors, setDoctors] = useState<Doctor[]>([])
+  const [presentations, setPresentations] = useState<PresentationType[]>([])
+  const [totalSessions, setTotalSessions] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // Calculate real stats from actual data
-  const totalSessions = recentSessions.length
-  const activeDoctors = doctors.filter((d) => d.status === "active").length
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setLoading(true)
+        const data = await getDashboardData()
+        setDoctors(data.doctors)
+        setPresentations(data.presentations)
+        setTotalSessions(data.totalSessions)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load data')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="p-4 md:p-6 bg-gray-50">
+        <div className="flex items-center gap-4 mb-6">
+          <SidebarTrigger />
+          <h1 className="text-2xl md:text-3xl font-bold">Sales Rep Dashboard</h1>
+        </div>
+        <div className="text-center">Loading...</div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 md:p-6 bg-gray-50">
+        <div className="flex items-center gap-4 mb-6">
+          <SidebarTrigger />
+          <h1 className="text-2xl md:text-3xl font-bold">Sales Rep Dashboard</h1>
+        </div>
+        <div className="text-center text-red-500">Error: {error}</div>
+      </div>
+    )
+  }
 
   return (
     <div className="p-4 md:p-6 bg-gray-50">

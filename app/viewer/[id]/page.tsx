@@ -1,3 +1,4 @@
+// page.tsx
 "use client"
 
 import { useState, useEffect, useRef } from "react"
@@ -5,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ChevronLeft, ChevronRight, Play, Pause, RotateCcw, Maximize, Minimize } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams, useParams } from "next/navigation"
 import { getPresentationData, startPresentationSession, endPresentationSession } from "@/app/actions"
 import { getDoctors, getPresentations, getFirstDoctor, getFirstPresentation } from "@/lib/db"
 import type { Slide } from "@/lib/db"
@@ -19,6 +20,7 @@ const formatTime = (time: number): string => {
 }
 
 export default function ViewerPage({ params }: { params: { id: string } }) {
+  const routerParams = useParams() as { id: string }
   const [currentSlide, setCurrentSlide] = useState(0)
   const [isPresenting, setIsPresenting] = useState(false)
   const [doctorId, setDoctorId] = useState("")
@@ -30,12 +32,14 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [fullscreen, setFullscreen] = useState(false)
-  const [presentationId, setPresentationId] = useState<string>(params.id)
+  const [presentationId, setPresentationId] = useState<string>(routerParams.id)
   const [totalSessionTime, setTotalSessionTime] = useState(0)
   const [sessionInterval, setSessionInterval] = useState<NodeJS.Timeout | null>(null)
   const [currentSlideTimeSpent, setCurrentSlideTimeSpent] = useState(0)
   const [slideTimeInterval, setSlideTimeInterval] = useState<NodeJS.Timeout | null>(null)
   const [presentation, setPresentation] = useState<any>(null)
+  const [doctors, setDoctors] = useState<any[]>([])
+  const [presentations, setPresentations] = useState<any[]>([])
 
   const { toast } = useToast()
   const router = useRouter()
@@ -44,16 +48,30 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
   const presentationRef = useRef<HTMLDivElement>(null)
   const totalSessionTimeRef = useRef<number>(0)
 
-  // Get doctors and presentations
-  const doctors = getDoctors()
-  const presentations = getPresentations()
+  // Load doctors and presentations once
+  useEffect(() => {
+    async function loadInitialData() {
+      try {
+        const [doctorsData, presentationsData] = await Promise.all([
+          getDoctors(),
+          getPresentations()
+        ])
+        setDoctors(doctorsData)
+        setPresentations(presentationsData)
+      } catch (error) {
+        console.error('Error loading initial data:', error)
+      }
+    }
+    loadInitialData()
+  }, [])
 
   // Check if the presentation ID exists, if not, use the first presentation
   useEffect(() => {
-    const presentationExists = presentations.some((p) => p.id === params.id)
+    if (presentations.length === 0) return
+
+    const presentationExists = presentations.some((p) => p.id === routerParams.id)
 
     if (!presentationExists && presentations.length > 0) {
-      // If the presentation doesn't exist but we have other presentations, use the first one
       const firstPresentation = presentations[0]
       setPresentationId(firstPresentation.id)
 
@@ -63,50 +81,56 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
         variant: "destructive",
       })
     } else {
-      // If the presentation exists, use it
-      setPresentationId(params.id)
+      setPresentationId(routerParams.id)
     }
-  }, [params.id, presentations, toast])
+  }, [routerParams.id, presentations, toast])
 
   // Check for doctorId in query params
   useEffect(() => {
+    if (doctors.length === 0) return
+
     const queryDoctorId = searchParams.get("doctorId")
     if (queryDoctorId) {
       setDoctorId(queryDoctorId)
     } else if (doctors.length > 0) {
-      // Default to first doctor if none specified
       setDoctorId(doctors[0].id)
     }
   }, [searchParams, doctors])
 
   // Fetch presentation data
   useEffect(() => {
+    if (!presentationId) return
+
     async function fetchData() {
       setLoading(true)
-      const result = await getPresentationData(presentationId)
+      try {
+        const result = await getPresentationData(presentationId)
 
-      if (result.success) {
-        setSlides(result.slides)
-        setPresentation(result.presentation)
-        setError(null)
-      } else {
-        // If there's an error, try to get the first presentation
-        const firstPresentation = getFirstPresentation()
-        if (firstPresentation && firstPresentation.id !== presentationId) {
-          setPresentationId(firstPresentation.id)
-          toast({
-            title: "Using default presentation",
-            description: `Switched to ${firstPresentation.title}`,
-            variant: "destructive",
-          })
+        if (result.success) {
+          setSlides(result.slides)
+          setPresentation(result.presentation)
+          setError(null)
         } else {
-          setError(result.message || "Failed to load presentation")
-          toast({
-            title: "Error",
-            description: result.message || "Failed to load presentation",
-            variant: "destructive",
-          })
+          const firstPresentation = await getFirstPresentation()
+          if (firstPresentation && firstPresentation.id !== presentationId) {
+            setPresentationId(firstPresentation.id)
+            toast({
+              title: "Using default presentation",
+              description: `Switched to ${firstPresentation.title}`,
+              variant: "destructive",
+            })
+          } else {
+            setError(result.message || "Failed to load presentation")
+            toast({
+              title: "Error",
+              description: result.message || "Failed to load presentation",
+              variant: "destructive",
+            })
+          }
         }
+      } catch (error) {
+        console.error('Error fetching presentation:', error)
+        setError('Failed to load presentation')
       }
 
       setLoading(false)
@@ -118,53 +142,45 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
   // Track slide viewing time with precise timing
   useEffect(() => {
     if (sessionStarted && isPresenting && slides.length > 0) {
-      // Reset current slide time when changing slides
       setCurrentSlideTimeSpent(0)
-
-      // Set the start time for the current slide with precise timestamp
       const now = Date.now()
       slideStartTimeRef.current = now
       setSlideStartTime(now)
 
-      // Clear any existing interval
       if (slideTimeInterval) {
         clearInterval(slideTimeInterval)
       }
 
-      // Start a new interval to update the current slide time every 100ms for more accuracy
       const interval = setInterval(() => {
         const elapsed = (Date.now() - slideStartTimeRef.current) / 1000
         setCurrentSlideTimeSpent(elapsed)
       }, 100)
 
       setSlideTimeInterval(interval)
-    }
 
-    return () => {
-      if (slideTimeInterval) {
-        clearInterval(slideTimeInterval)
+      return () => {
+        clearInterval(interval)
       }
     }
-  }, [currentSlide, sessionStarted, isPresenting, slides])
+  }, [currentSlide, sessionStarted, isPresenting, slides.length])
 
   // Track total session time with precise timing
   useEffect(() => {
     if (sessionStarted && isPresenting) {
       if (sessionInterval) clearInterval(sessionInterval)
 
-      // Update every 100ms for more accurate timing
       const interval = setInterval(() => {
         totalSessionTimeRef.current += 0.1
         setTotalSessionTime(totalSessionTimeRef.current)
       }, 100)
 
       setSessionInterval(interval)
+
+      return () => {
+        clearInterval(interval)
+      }
     } else if (sessionInterval) {
       clearInterval(sessionInterval)
-    }
-
-    return () => {
-      if (sessionInterval) clearInterval(sessionInterval)
     }
   }, [sessionStarted, isPresenting])
 
@@ -192,7 +208,7 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
       if (sessionInterval) clearInterval(sessionInterval)
       if (slideTimeInterval) clearInterval(slideTimeInterval)
     }
-  }, [])
+  }, [sessionInterval, slideTimeInterval])
 
   const toggleFullscreen = () => {
     setFullscreen(!fullscreen)
@@ -205,13 +221,10 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
 
       console.log(`Recording time for slide ${slideIndex} (${slideId}): ${timeSpent}ms`)
 
-      // Update session data with the time spent on this slide
       setSessionData((prev) => {
-        // Check if we already have data for this slide
         const existingIndex = prev.findIndex((item) => item.slideId === slideId)
 
         if (existingIndex >= 0) {
-          // Update existing entry by adding to the time
           const updated = [...prev]
           updated[existingIndex] = {
             slideId: slideId,
@@ -220,7 +233,6 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
           console.log(`Updated existing slide data:`, updated[existingIndex])
           return updated
         } else {
-          // Add new entry
           const newEntry = { slideId: slideId, timeSpent }
           console.log(`Added new slide data:`, newEntry)
           return [...prev, newEntry]
@@ -245,8 +257,7 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
 
   const startSession = async () => {
     if (!doctorId) {
-      // If no doctor is selected, use the first one
-      const firstDoctor = getFirstDoctor()
+      const firstDoctor = await getFirstDoctor()
       if (firstDoctor) {
         setDoctorId(firstDoctor.id)
       } else {
@@ -259,11 +270,9 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
       }
     }
 
-    // Verify the doctor exists
     const doctorExists = doctors.some((d) => d.id === doctorId)
     if (!doctorExists) {
-      // If the doctor doesn't exist, use the first one
-      const firstDoctor = getFirstDoctor()
+      const firstDoctor = await getFirstDoctor()
       if (firstDoctor) {
         setDoctorId(firstDoctor.id)
       } else {
@@ -284,8 +293,8 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
       setIsPresenting(true)
       totalSessionTimeRef.current = 0
       setTotalSessionTime(0)
-      setSessionData([]) // Reset session data
-      slideStartTimeRef.current = Date.now() // Set initial slide start time with precise timestamp
+      setSessionData([])
+      slideStartTimeRef.current = Date.now()
       setCurrentSlideTimeSpent(0)
 
       const doctor = doctors.find((d) => d.id === doctorId)
@@ -307,22 +316,12 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
     if (!sessionId) return
 
     console.log("Starting endSession process...")
-    console.log("Current sessionData:", sessionData)
-    console.log("Current slide:", currentSlide)
-    console.log(
-      "Slides:",
-      slides.map((s) => ({ id: s.id, title: s.title })),
-    )
-
-    // Record time for the current slide before ending
     recordSlideTime(currentSlide)
 
-    // Wait a moment for state to update and get the latest sessionData
     await new Promise((resolve) => setTimeout(resolve, 200))
 
     setIsPresenting(false)
 
-    // Clear intervals
     if (sessionInterval) {
       clearInterval(sessionInterval)
       setSessionInterval(null)
@@ -333,10 +332,7 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
       setSlideTimeInterval(null)
     }
 
-    // Get current session data and ensure we have data for the current slide
     const finalSessionData = [...sessionData]
-
-    // Make sure we record the current slide time
     const currentSlideTime = Date.now() - slideStartTimeRef.current
     if (currentSlideTime > 0 && slides[currentSlide]) {
       const currentSlideId = slides[currentSlide].id
@@ -352,20 +348,13 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
       }
     }
 
-    console.log("Final session data before sending:", finalSessionData)
-
-    // Prepare slide analytics data
     const slideAnalytics = finalSessionData.map((data) => ({
       sessionId,
       slideId: data.slideId,
       timeSpent: data.timeSpent,
     }))
 
-    console.log("Slide analytics to send:", slideAnalytics)
-
     const result = await endPresentationSession(sessionId, slideAnalytics)
-
-    console.log("End session result:", result)
 
     if (result.success) {
       toast({
@@ -373,7 +362,6 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
         description: `Analytics recorded for ${slideAnalytics.length} slides`,
       })
 
-      // Navigate back to analytics to see the data
       setTimeout(() => {
         router.push("/analytics")
       }, 1500)

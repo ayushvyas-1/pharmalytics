@@ -1,9 +1,7 @@
-// Add this at the top of the file, before any other code
-// Ensure we're not using Node.js specific modules in client components
-if (typeof window !== "undefined") {
-  // We're in the browser, no Node.js modules should be imported
-}
+"use server"
 
+import fs from 'fs'
+import path from 'path'
 import { v4 as uuidv4 } from "uuid"
 
 // Define types for our data model
@@ -66,12 +64,20 @@ export type Database = {
   slideAnalytics: SlideAnalytic[]
 }
 
-// In-memory database for serverless environment
-let inMemoryDb: Database | null = null
+// JSON file paths
+const DATA_DIR = path.join(process.cwd(), 'data')
+const DB_FILE = path.join(DATA_DIR, 'database.json')
 
 // Use fixed IDs for presentations to ensure they never change
 const PRESENTATION_1_ID = "presentation-1"
 const PRESENTATION_2_ID = "presentation-2"
+
+// Ensure data directory exists
+function ensureDataDir() {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true })
+  }
+}
 
 // Initial data for the database
 const getInitialData = (): Database => {
@@ -79,7 +85,7 @@ const getInitialData = (): Database => {
   const doctorId1 = "doctor-1"
   const doctorId2 = "doctor-2"
 
-  // Create initial database with just two doctors
+  // Create initial database with clean doctors (no sessions)
   const initialData: Database = {
     doctors: [
       {
@@ -219,173 +225,96 @@ const getInitialData = (): Database => {
     })
   })
 
-  // --- Start: Add Sample Sessions and Analytics for Demonstration ---
-  const now = new Date();
-  const threeHoursAgo = new Date(now.getTime() - 3 * 60 * 60 * 1000).toISOString();
-  const twoDaysAgo = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString();
-  const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
-
-  // Sample Session 1: Dr. Sarah Smith with Cardiomax
-  const session1Id = uuidv4();
-  initialData.sessions.push({
-    id: session1Id,
-    doctorId: doctorId1,
-    presentationId: PRESENTATION_1_ID,
-    startTime: threeHoursAgo,
-    endTime: new Date().toISOString(),
-    totalTime: 300, // 5 minutes
-    avgEngagement: 85,
-  });
-
-  // Sample Slide Analytics for Session 1
-  initialData.slideAnalytics.push(
-    { id: uuidv4(), sessionId: session1Id, slideId: "slide-1-0", timeSpent: 20000 }, // 20 seconds
-    { id: uuidv4(), sessionId: session1Id, slideId: "slide-1-1", timeSpent: 15000 }, // 15 seconds
-    { id: uuidv4(), sessionId: session1Id, slideId: "slide-1-2", timeSpent: 10000 }, // 10 seconds
-    { id: uuidv4(), sessionId: session1Id, slideId: "slide-1-3", timeSpent: 5000 },  // 5 seconds
-    { id: uuidv4(), sessionId: session1Id, slideId: "slide-1-4", timeSpent: 12000 }, // 12 seconds
-    { id: uuidv4(), sessionId: session1Id, slideId: "slide-1-5", timeSpent: 8000 }  // 8 seconds
-  );
-
-  // Update doctor and presentation stats for Sample Session 1
-  const doctor1 = initialData.doctors.find(d => d.id === doctorId1);
-  if (doctor1) {
-      doctor1.sessions += 1;
-      doctor1.lastSession = new Date().toISOString();
-      doctor1.avgEngagement = Math.round((doctor1.avgEngagement * (doctor1.sessions - 1) + 85) / doctor1.sessions);
-      const currentTotalMinutes = Number.parseInt(doctor1.totalTime.split("h")[0] || "0") * 60 +
-          Number.parseInt(doctor1.totalTime.split("h ")[1]?.split("m")[0] || "0");
-      const totalMinutes = Math.round(currentTotalMinutes + 300 / 60);
-      const hours = Math.floor(totalMinutes / 60);
-      const minutes = totalMinutes % 60;
-      doctor1.totalTime = `${hours}h ${minutes}m`;
-  }
-  const presentation1 = initialData.presentations.find(p => p.id === PRESENTATION_1_ID);
-  if (presentation1) {
-      presentation1.sessions += 1;
-      presentation1.lastUsed = new Date().toISOString();
-      presentation1.avgEngagement = Math.round((presentation1.avgEngagement * (presentation1.sessions - 1) + 85) / presentation1.sessions);
-  }
-
-
-  // Sample Session 2: Dr. Michael Johnson with Glucobalance
-  const session2Id = uuidv4();
-  initialData.sessions.push({
-    id: session2Id,
-    doctorId: doctorId2,
-    presentationId: PRESENTATION_2_ID,
-    startTime: twoDaysAgo,
-    endTime: new Date().toISOString(),
-    totalTime: 450, // 7.5 minutes
-    avgEngagement: 70,
-  });
-
-  // Sample Slide Analytics for Session 2
-  initialData.slideAnalytics.push(
-    { id: uuidv4(), sessionId: session2Id, slideId: "slide-2-0", timeSpent: 30000 },
-    { id: uuidv4(), sessionId: session2Id, slideId: "slide-2-1", timeSpent: 20000 },
-    { id: uuidv4(), sessionId: session2Id, slideId: "slide-2-2", timeSpent: 10000 },
-    { id: uuidv4(), sessionId: session2Id, slideId: "slide-2-3", timeSpent: 5000 },
-    { id: uuidv4(), sessionId: session2Id, slideId: "slide-2-4", timeSpent: 18000 },
-    { id: uuidv4(), sessionId: session2Id, slideId: "slide-2-5", timeSpent: 12000 }
-  );
-
-  // Update doctor and presentation stats for Sample Session 2
-  const doctor2 = initialData.doctors.find(d => d.id === doctorId2);
-  if (doctor2) {
-      doctor2.sessions += 1;
-      doctor2.lastSession = new Date().toISOString();
-      doctor2.avgEngagement = Math.round((doctor2.avgEngagement * (doctor2.sessions - 1) + 70) / doctor2.sessions);
-      const currentTotalMinutes = Number.parseInt(doctor2.totalTime.split("h")[0] || "0") * 60 +
-          Number.parseInt(doctor2.totalTime.split("h ")[1]?.split("m")[0] || "0");
-      const totalMinutes = Math.round(currentTotalMinutes + 450 / 60);
-      const hours = Math.floor(totalMinutes / 60);
-      const minutes = totalMinutes % 60;
-      doctor2.totalTime = `${hours}h ${minutes}m`;
-  }
-  const presentation2 = initialData.presentations.find(p => p.id === PRESENTATION_2_ID);
-  if (presentation2) {
-      presentation2.sessions += 1;
-      presentation2.lastUsed = new Date().toISOString();
-      presentation2.avgEngagement = Math.round((presentation2.avgEngagement * (presentation2.sessions - 1) + 70) / presentation2.sessions);
-  }
-
-  // --- End: Add Sample Sessions and Analytics for Demonstration ---
-
   return initialData
 }
 
-// Initialize database
-export function initializeDatabase() {
-  if (!inMemoryDb) {
-    inMemoryDb = getInitialData()
+// Load database from JSON file
+async function loadDatabase(): Promise<Database> {
+  try {
+    ensureDataDir()
+    
+    if (fs.existsSync(DB_FILE)) {
+      const fileContent = fs.readFileSync(DB_FILE, 'utf8')
+      return JSON.parse(fileContent) as Database
+    } else {
+      // Create initial database if file doesn't exist
+      const initialData = getInitialData()
+      await saveDatabase(initialData)
+      return initialData
+    }
+  } catch (error) {
+    console.error('Error loading database:', error)
+    // Return initial data if there's an error
+    return getInitialData()
+  }
+}
+
+// Save database to JSON file
+async function saveDatabase(data: Database): Promise<void> {
+  try {
+    ensureDataDir()
+    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf8')
+  } catch (error) {
+    console.error('Error saving database:', error)
   }
 }
 
 // Get database
-export function getDatabase(): Database {
-  if (!inMemoryDb) {
-    initializeDatabase()
-  }
-  return inMemoryDb as Database
-}
-
-// Save database
-export function saveDatabase(data: Database) {
-  inMemoryDb = data
+export async function getDatabase(): Promise<Database> {
+  return await loadDatabase()
 }
 
 // Helper functions for database operations
-export function getDoctors(): Doctor[] {
-  const db = getDatabase()
+export async function getDoctors(): Promise<Doctor[]> {
+  const db = await getDatabase()
   return db.doctors
 }
 
-export function getDoctor(id: string): Doctor | undefined {
-  const db = getDatabase()
+export async function getDoctor(id: string): Promise<Doctor | undefined> {
+  const db = await getDatabase()
   return db.doctors.find((doctor) => doctor.id === id)
 }
 
-export function getPresentations(): Presentation[] {
-  const db = getDatabase()
+export async function getPresentations(): Promise<Presentation[]> {
+  const db = await getDatabase()
   return db.presentations
 }
 
-export function getPresentation(id: string): Presentation | undefined {
-  const db = getDatabase()
+export async function getPresentation(id: string): Promise<Presentation | undefined> {
+  const db = await getDatabase()
   return db.presentations.find((presentation) => presentation.id === id)
 }
 
-export function getSlidesByPresentation(presentationId: string): Slide[] {
-  const db = getDatabase()
+export async function getSlidesByPresentation(presentationId: string): Promise<Slide[]> {
+  const db = await getDatabase()
   return db.slides.filter((slide) => slide.presentationId === presentationId).sort((a, b) => a.order - b.order)
 }
 
-export function createPresentation(presentation: Omit<Presentation, "id" | "createdAt">): Presentation {
-  const db = getDatabase()
+export async function createPresentation(presentation: Omit<Presentation, "id" | "createdAt">): Promise<Presentation> {
+  const db = await getDatabase()
   const newPresentation: Presentation = {
     ...presentation,
     id: uuidv4(),
     createdAt: new Date().toISOString(),
   }
   db.presentations.push(newPresentation)
-  saveDatabase(db)
+  await saveDatabase(db)
   return newPresentation
 }
 
-export function createSlides(slides: Omit<Slide, "id">[]): Slide[] {
-  const db = getDatabase()
+export async function createSlides(slides: Omit<Slide, "id">[]): Promise<Slide[]> {
+  const db = await getDatabase()
   const newSlides = slides.map((slide) => ({
     ...slide,
     id: uuidv4(),
   }))
   db.slides.push(...newSlides)
-  saveDatabase(db)
+  await saveDatabase(db)
   return newSlides
 }
 
-export function startSession(doctorId: string, presentationId: string): Session {
-  const db = getDatabase()
+export async function startSession(doctorId: string, presentationId: string): Promise<Session> {
+  const db = await getDatabase()
   const newSession: Session = {
     id: uuidv4(),
     doctorId,
@@ -393,7 +322,7 @@ export function startSession(doctorId: string, presentationId: string): Session 
     startTime: new Date().toISOString(),
   }
   db.sessions.push(newSession)
-  saveDatabase(db)
+  await saveDatabase(db)
   
   console.log("DB: Session started:", newSession)
   console.log("DB: Total sessions in database:", db.sessions.length)
@@ -401,8 +330,8 @@ export function startSession(doctorId: string, presentationId: string): Session 
   return newSession
 }
 
-export function endSession(sessionId: string, slideAnalytics: Omit<SlideAnalytic, "id">[]): Session {
-  const db = getDatabase()
+export async function endSession(sessionId: string, slideAnalytics: Omit<SlideAnalytic, "id">[]): Promise<Session> {
+  const db = await getDatabase()
   const session = db.sessions.find((s) => s.id === sessionId)
 
   console.log("DB: Ending session with ID:", sessionId)
@@ -437,29 +366,32 @@ export function endSession(sessionId: string, slideAnalytics: Omit<SlideAnalytic
 
   console.log("DB: Total slide analytics in database:", db.slideAnalytics.length)
 
-  // Calculate average engagement
+  // Calculate average engagement based on actual time spent vs total session time
   const totalTimeSpent = newSlideAnalytics.reduce((sum, analytic) => sum + analytic.timeSpent, 0)
-  session.avgEngagement = session.totalTime > 0 ? Math.round((totalTimeSpent / (session.totalTime * 1000)) * 100) : 0
+  session.avgEngagement = session.totalTime && session.totalTime > 0 
+    ? Math.min(100, Math.round((totalTimeSpent / (session.totalTime * 1000)) * 100))
+    : 0
 
   console.log("DB: Calculated engagement:", session.avgEngagement)
 
-  // Update doctor stats
+  // Update doctor stats with real calculations
   const doctor = db.doctors.find((d) => d.id === session.doctorId)
   if (doctor) {
     console.log("DB: Updating doctor stats for:", doctor.name)
     doctor.sessions += 1
     doctor.lastSession = session.endTime
 
-    // Update average engagement (simple average for demo)
-    doctor.avgEngagement = Math.round(
-      (doctor.avgEngagement * (doctor.sessions - 1) + session.avgEngagement!) / doctor.sessions,
-    )
+    // Calculate real average engagement
+    const allDoctorSessions = db.sessions.filter(s => s.doctorId === session.doctorId && s.avgEngagement !== undefined)
+    const totalEngagement = allDoctorSessions.reduce((sum, s) => sum + (s.avgEngagement || 0), 0)
+    doctor.avgEngagement = allDoctorSessions.length > 0 
+      ? Math.round(totalEngagement / allDoctorSessions.length)
+      : 0
 
-    // Update total time (simplified for demo)
-    const currentTotalMinutes = Number.parseInt(doctor.totalTime.split("h")[0] || "0") * 60 +
-      Number.parseInt(doctor.totalTime.split("h ")[1]?.split("m")[0] || "0")
-    
-    const totalMinutes = Math.round(currentTotalMinutes + (session.totalTime || 0) / 60)
+    // Calculate real total time from all completed sessions
+    const completedSessions = db.sessions.filter(s => s.doctorId === session.doctorId && s.totalTime)
+    const totalSeconds = completedSessions.reduce((sum, s) => sum + (s.totalTime || 0), 0)
+    const totalMinutes = Math.round(totalSeconds / 60)
     const hours = Math.floor(totalMinutes / 60)
     const minutes = totalMinutes % 60
     doctor.totalTime = `${hours}h ${minutes}m`
@@ -471,17 +403,19 @@ export function endSession(sessionId: string, slideAnalytics: Omit<SlideAnalytic
     })
   }
 
-  // Update presentation stats
+  // Update presentation stats with real calculations
   const presentation = db.presentations.find((p) => p.id === session.presentationId)
   if (presentation) {
     console.log("DB: Updating presentation stats for:", presentation.title)
     presentation.sessions += 1
     presentation.lastUsed = session.endTime
 
-    // Update average engagement
-    presentation.avgEngagement = Math.round(
-      (presentation.avgEngagement * (presentation.sessions - 1) + session.avgEngagement!) / presentation.sessions,
-    )
+    // Calculate real average engagement for this presentation
+    const allPresentationSessions = db.sessions.filter(s => s.presentationId === session.presentationId && s.avgEngagement !== undefined)
+    const totalEngagement = allPresentationSessions.reduce((sum, s) => sum + (s.avgEngagement || 0), 0)
+    presentation.avgEngagement = allPresentationSessions.length > 0 
+      ? Math.round(totalEngagement / allPresentationSessions.length)
+      : 0
 
     console.log("DB: Updated presentation:", {
       sessions: presentation.sessions,
@@ -489,31 +423,31 @@ export function endSession(sessionId: string, slideAnalytics: Omit<SlideAnalytic
     })
   }
 
-  saveDatabase(db)
+  await saveDatabase(db)
   console.log("DB: Database saved successfully")
 
   return session
 }
 
-export function getSessionsByDoctor(doctorId: string): Session[] {
-  const db = getDatabase()
+export async function getSessionsByDoctor(doctorId: string): Promise<Session[]> {
+  const db = await getDatabase()
   return db.sessions.filter((session) => session.doctorId === doctorId)
 }
 
-export function getSessionsByPresentation(presentationId: string): Session[] {
-  const db = getDatabase()
+export async function getSessionsByPresentation(presentationId: string): Promise<Session[]> {
+  const db = await getDatabase()
   return db.sessions.filter((session) => session.presentationId === presentationId)
 }
 
-export function getSlideAnalyticsBySession(sessionId: string): SlideAnalytic[] {
-  const db = getDatabase()
+export async function getSlideAnalyticsBySession(sessionId: string): Promise<SlideAnalytic[]> {
+  const db = await getDatabase()
   return db.slideAnalytics.filter((analytic) => analytic.sessionId === sessionId)
 }
 
-export function getTopPerformingSlides(
+export async function getTopPerformingSlides(
   limit = 5,
-): { slide: Slide; avgTimeSpent: number; views: number; totalTimeSpent: number }[] {
-  const db = getDatabase()
+): Promise<{ slide: Slide; avgTimeSpent: number; views: number; totalTimeSpent: number }[]> {
+  const db = await getDatabase()
 
   console.log("DB: Getting top performing slides")
   console.log("DB: Total slide analytics:", db.slideAnalytics.length)
@@ -560,14 +494,14 @@ export function getTopPerformingSlides(
   return result
 }
 
-export function getRecentSessions(limit = 5): Array<{
+export async function getRecentSessions(limit = 5): Promise<Array<{
   session: Session
   doctor: Doctor
   presentation: Presentation
   slides: number
   duration: number
-}> {
-  const db = getDatabase()
+}>> {
+  const db = await getDatabase()
 
   console.log("DB: Getting recent sessions")
   console.log("DB: Total sessions:", db.sessions.length)
@@ -608,7 +542,7 @@ export function getRecentSessions(limit = 5): Array<{
   return result
 }
 
-export function formatTime(seconds: number): string {
+export async function formatTime(seconds: number): Promise<string> {
   if (isNaN(seconds) || seconds < 0) {
     return "00:00"
   }
@@ -628,7 +562,7 @@ export function formatTime(seconds: number): string {
   }
 }
 
-export function getTimeAgo(dateString: string): string {
+export async function getTimeAgo(dateString: string): Promise<string> {
   const date = new Date(dateString)
   const now = new Date()
   const seconds = Math.floor((now.getTime() - date.getTime()) / 1000)
@@ -652,8 +586,8 @@ export function getTimeAgo(dateString: string): string {
 }
 
 // Get doctor presentations
-export function getDoctorPresentations(doctorId: string): Presentation[] {
-  const db = getDatabase()
+export async function getDoctorPresentations(doctorId: string): Promise<Presentation[]> {
+  const db = await getDatabase()
   const doctor = db.doctors.find((d) => d.id === doctorId)
   if (!doctor) return []
 
@@ -663,32 +597,32 @@ export function getDoctorPresentations(doctorId: string): Presentation[] {
 }
 
 // Get the first presentation (for quick access)
-export function getFirstPresentation(): Presentation | undefined {
-  const db = getDatabase()
+export async function getFirstPresentation(): Promise<Presentation | undefined> {
+  const db = await getDatabase()
   return db.presentations[0]
 }
 
 // Get the first doctor (for quick access)
-export function getFirstDoctor(): Doctor | undefined {
-  const db = getDatabase()
+export async function getFirstDoctor(): Promise<Doctor | undefined> {
+  const db = await getDatabase()
   return db.doctors[0]
 }
 
 // Get the marketing presentation
-export function getMarketingPresentation(): Presentation | undefined {
-  const db = getDatabase()
+export async function getMarketingPresentation(): Promise<Presentation | undefined> {
+  const db = await getDatabase()
   return db.presentations.find((p) => p.id === PRESENTATION_1_ID)
 }
 
 // Get slide analytics for a specific slide
-export function getSlideAnalytics(slideId: string): SlideAnalytic[] {
-  const db = getDatabase()
+export async function getSlideAnalytics(slideId: string): Promise<SlideAnalytic[]> {
+  const db = await getDatabase()
   return db.slideAnalytics.filter((analytic) => analytic.slideId === slideId)
 }
 
 // Get all slide analytics
-export function getAllSlideAnalytics(): SlideAnalytic[] {
-  const db = getDatabase()
+export async function getAllSlideAnalytics(): Promise<SlideAnalytic[]> {
+  const db = await getDatabase()
   console.log("DB: Getting all slide analytics, count:", db.slideAnalytics.length)
   return db.slideAnalytics
 }

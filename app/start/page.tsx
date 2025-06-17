@@ -4,23 +4,52 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { getDoctors, getPresentations } from "@/lib/db"
+import { Doctor, Presentation as PresentationType } from "@/lib/db"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Play, User, Presentation } from "lucide-react"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 
+// Fetch functions
+async function getStartPageData() {
+  const response = await fetch('/api/start')
+  if (!response.ok) {
+    throw new Error('Failed to fetch start page data')
+  }
+  return response.json()
+}
+
 export default function StartPage() {
   const [selectedDoctor, setSelectedDoctor] = useState("")
   const [selectedPresentation, setSelectedPresentation] = useState("")
+  const [doctors, setDoctors] = useState<Doctor[]>([])
+  const [presentations, setPresentations] = useState<PresentationType[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const doctors = getDoctors()
-  const presentations = getPresentations()
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setLoading(true)
+        const data = await getStartPageData()
+        setDoctors(data.doctors)
+        setPresentations(data.presentations)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load data')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
 
   // Set defaults from URL params or first available
   useEffect(() => {
+    if (doctors.length === 0 || presentations.length === 0) return
+
     const doctorId = searchParams.get("doctorId")
     const presentationId = searchParams.get("presentationId")
 
@@ -41,6 +70,30 @@ export default function StartPage() {
     if (selectedDoctor && selectedPresentation) {
       router.push(`/viewer/${selectedPresentation}?doctorId=${selectedDoctor}`)
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="p-4 md:p-6">
+        <div className="flex items-center gap-4 mb-6">
+          <SidebarTrigger />
+          <h1 className="text-2xl md:text-3xl font-bold">Start Presentation</h1>
+        </div>
+        <div className="text-center">Loading...</div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 md:p-6">
+        <div className="flex items-center gap-4 mb-6">
+          <SidebarTrigger />
+          <h1 className="text-2xl md:text-3xl font-bold">Start Presentation</h1>
+        </div>
+        <div className="text-center text-red-500">Error: {error}</div>
+      </div>
+    )
   }
 
   return (

@@ -5,10 +5,6 @@ import "./globals.css"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { Toaster } from "@/components/ui/toaster"
-import { initializeDatabase } from "@/lib/db"
-
-// Initialize database on server start
-initializeDatabase()
 
 const inter = Inter({ subsets: ["latin"] })
 

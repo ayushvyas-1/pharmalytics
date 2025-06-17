@@ -11,13 +11,6 @@ import {
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 import { Users, Download, Clock, Presentation } from "lucide-react";
-import {
-  formatTime,
-  getTimeAgo,
-  getSlidesByPresentation,
-  getSessionsByPresentation,
-  initializeDatabase,
-} from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -28,11 +21,66 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+// Move utility functions to client-side (remove server dependency)
+function formatTime(seconds: number): string {
+  if (isNaN(seconds) || seconds < 0) {
+    return "00:00";
+  }
+
+  // Calculate hours, minutes, and seconds
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+
+  // Format with leading zeros
+  if (hours > 0) {
+    return `${hours.toString().padStart(2, "0")}:${minutes
+      .toString()
+      .padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
+  } else {
+    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds
+      .toString()
+      .padStart(2, "0")}`;
+  }
+}
+
+function getTimeAgo(dateString: string): string {
+  const date = new Date(dateString);
+  const now = new Date();
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (seconds < 60) return "just now";
+
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} minute${minutes !== 1 ? "s" : ""} ago`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours !== 1 ? "s" : ""} ago`;
+
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `${days} day${days !== 1 ? "s" : ""} ago`;
+
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months} month${months !== 1 ? "s" : ""} ago`;
+
+  const years = Math.floor(months / 12);
+  return `${years} year${years !== 1 ? "s" : ""} ago`;
+}
+
+// Client-side helper functions
+function getSlidesByPresentation(presentationId: string, slides: any[]) {
+  return slides
+    .filter((slide) => slide.presentationId === presentationId)
+    .sort((a, b) => a.order - b.order);
+}
+
+function getSessionsByPresentation(presentationId: string, sessions: any[]) {
+  return sessions.filter((session) => session.presentationId === presentationId);
+}
+
 export default function AnalyticsPage() {
-  const [selectedDoctor, setSelectedDoctor] = useState<string | null>("all");
-  const [selectedPresentation, setSelectedPresentation] = useState<
-    string
-  >("all");
+  const [selectedDoctor, setSelectedDoctor] = useState<string>("all");
+  const [selectedPresentation, setSelectedPresentation] = useState<string>("all");
   const [data, setData] = useState<{
     doctors: any[];
     presentations: any[];
@@ -40,32 +88,55 @@ export default function AnalyticsPage() {
     topSlides: any[];
     allSlideAnalytics: any[];
   } | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+
     async function fetchData() {
       try {
-        const response = await fetch("/api/analytics");
+        setIsLoading(true);
+        setError(null);
+        
+        const response = await fetch("/api/analytics", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
         const result = await response.json();
-        console.log(result);
-        setData(result);
+        
+        if (isMounted) {
+          console.log("Analytics data loaded:", result);
+          setData(result);
+        }
       } catch (error) {
         console.error("Error fetching analytics:", error);
+        if (isMounted) {
+          setError(error instanceof Error ? error.message : "Failed to fetch analytics");
+        }
       } finally {
-        setIsLoaded(true);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
+
     fetchData();
-  }, []);
 
-  // Initialize database when component mounts
-  useEffect(() => {
-    initializeDatabase();
-    setIsLoaded(true);
-  }, []);
+    return () => {
+      isMounted = false;
+    };
+  }, []); // Keep empty dependency array
 
-  // Don't render until database is loaded
-  if (!isLoaded) {
+  // Loading state
+  if (isLoading) {
     return (
       <div className="p-4 md:p-6 bg-gray-50">
         <div className="flex items-center justify-center h-64">
@@ -75,11 +146,33 @@ export default function AnalyticsPage() {
     );
   }
 
+  // Error state
+  if (error) {
+    return (
+      <div className="p-4 md:p-6 bg-gray-50">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <p className="text-red-500 mb-2">Error loading analytics</p>
+            <p className="text-sm text-muted-foreground">{error}</p>
+            <Button 
+              onClick={() => window.location.reload()} 
+              className="mt-4"
+              variant="outline"
+            >
+              Retry
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // No data state
   if (!data) {
     return (
       <div className="p-4 md:p-6 bg-gray-50">
         <div className="flex items-center justify-center h-64">
-          <p className="text-muted-foreground">No DATA FEtched...</p>
+          <p className="text-muted-foreground">No data available</p>
         </div>
       </div>
     );
@@ -100,9 +193,6 @@ export default function AnalyticsPage() {
   console.log("- All slide analytics:", allSlideAnalytics.length);
   console.log("- Top slides:", topSlides.length);
 
-  console.log("Recent sessions data:", recentSessions);
-  console.log("All slide analytics data:", allSlideAnalytics);
-
   // Calculate real summary stats from actual data
   const totalSessions = recentSessions.length;
   const activeDoctors = doctors.filter((d) => d.status === "active").length;
@@ -111,12 +201,6 @@ export default function AnalyticsPage() {
   const totalTimeSpent =
     allSlideAnalytics.reduce((sum, analytic) => sum + analytic.timeSpent, 0) /
     1000; // Convert to seconds
-
-  console.log("Calculated stats:", {
-    totalSessions,
-    activeDoctors,
-    totalTimeSpent,
-  });
 
   // Get filtered sessions based on selected doctor and presentation
   const getFilteredSessions = () => {
@@ -137,24 +221,30 @@ export default function AnalyticsPage() {
 
   // Get slide analytics for a specific presentation
   const getSlideAnalyticsForPresentation = (presentationId: string) => {
-    const slides = getSlidesByPresentation(presentationId);
-    const sessions = getSessionsByPresentation(presentationId);
+    const slides = getSlidesByPresentation(presentationId, data?.presentations.find(p => p.id === presentationId)?.slides || []);
+    const sessions = getSessionsByPresentation(presentationId, recentSessions);
 
     // Create a map to store time spent per slide
-    const slideTimeMap = new Map<
-      string,
-      { timeSpent: number; views: number }
-    >();
+    const slideTimeMap = new Map<string, { timeSpent: number; views: number }>();
 
-    // Initialize map with all slides
-    slides.forEach((slide) => {
+    // Initialize map with all slides from the data
+    const allSlides = presentations.reduce((acc, pres) => {
+      if (pres.id === presentationId) {
+        // Find slides for this presentation from topSlides or create from available data
+        const presentationSlides = topSlides.filter(slide => slide.slide.presentationId === presentationId);
+        return [...acc, ...presentationSlides.map(item => item.slide)];
+      }
+      return acc;
+    }, []);
+
+    allSlides.forEach((slide) => {
       slideTimeMap.set(slide.id, { timeSpent: 0, views: 0 });
     });
 
     // Aggregate time spent from all sessions
     sessions.forEach((session) => {
       const analytics = allSlideAnalytics.filter(
-        (a) => a.sessionId === session.id
+        (a) => a.sessionId === session.session.id
       );
 
       analytics.forEach((analytic) => {
@@ -169,7 +259,7 @@ export default function AnalyticsPage() {
     });
 
     // Convert map to array and join with slide data
-    return slides
+    return allSlides
       .map((slide) => {
         const stats = slideTimeMap.get(slide.id) || { timeSpent: 0, views: 0 };
         return {
@@ -236,8 +326,8 @@ export default function AnalyticsPage() {
               Presentations delivered
             </p>
             <Select
-              value={selectedDoctor || "all"}
-              onValueChange={(value) => setSelectedDoctor(value || "all")}
+              value={selectedDoctor}
+              onValueChange={setSelectedDoctor}
             >
               <SelectTrigger className="mt-2">
                 <SelectValue placeholder="Filter by doctor" />
@@ -269,8 +359,8 @@ export default function AnalyticsPage() {
               Time spent on slides
             </p>
             <Select
-              value={selectedPresentation || "all"}
-              onValueChange={(value) => setSelectedPresentation(value || "all")}
+              value={selectedPresentation}
+              onValueChange={setSelectedPresentation}
             >
               <SelectTrigger className="mt-2">
                 <SelectValue placeholder="Filter by presentation" />

@@ -24,7 +24,7 @@ export async function uploadPresentation(formData: FormData) {
   }
 
   // Create a new presentation
-  const newPresentation = createPresentation({
+  const newPresentation = await createPresentation({
     title,
     description,
     slides: 5, // Default for demo
@@ -65,7 +65,7 @@ export async function uploadPresentation(formData: FormData) {
     order: index,
   }))
 
-  createSlides(slides)
+  await createSlides(slides)
 
   revalidatePath("/presentations")
   return { success: true, presentationId: newPresentation.id }
@@ -74,8 +74,8 @@ export async function uploadPresentation(formData: FormData) {
 export async function startPresentationSession(doctorId: string, presentationId: string) {
   try {
     // Get all doctors and presentations to make sure we have data
-    const doctors = getDoctors()
-    const presentations = getPresentations()
+    const doctors = await getDoctors()
+    const presentations = await getPresentations()
 
     // Find the specific doctor and presentation
     const doctor = doctors.find((d) => d.id === doctorId)
@@ -100,7 +100,7 @@ export async function startPresentationSession(doctorId: string, presentationId:
     }
 
     // If we have both doctor and presentation, start the session
-    const session = startSession(doctorId, presentationId)
+    const session = await startSession(doctorId, presentationId)
     return { success: true, sessionId: session.id }
   } catch (error) {
     console.error("Error starting session:", error)
@@ -115,7 +115,7 @@ export async function endPresentationSession(sessionId: string, slideAnalytics: 
   try {
     console.log("Server: Ending session", sessionId, "with analytics:", slideAnalytics) // Debug log
 
-    const session = endSession(sessionId, slideAnalytics)
+    const session = await endSession(sessionId, slideAnalytics)
 
     console.log("Server: Session ended successfully", session) // Debug log
 
@@ -135,7 +135,7 @@ export async function endPresentationSession(sessionId: string, slideAnalytics: 
 export async function getPresentationData(presentationId: string) {
   try {
     // Get all presentations to make sure we have data
-    const presentations = getPresentations()
+    const presentations = await getPresentations()
     const presentation = presentations.find((p) => p.id === presentationId)
 
     if (!presentation) {
@@ -147,7 +147,7 @@ export async function getPresentationData(presentationId: string) {
       return { success: false, message: `Presentation not found with ID: ${presentationId}` }
     }
 
-    const slides = getSlidesByPresentation(presentationId)
+    const slides = await getSlidesByPresentation(presentationId)
     return { success: true, presentation, slides }
   } catch (error) {
     console.error("Error getting presentation data:", error)

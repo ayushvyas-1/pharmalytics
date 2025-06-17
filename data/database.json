@@ -1,0 +1,197 @@
+{
+  "doctors": [
+    {
+      "id": "doctor-1",
+      "name": "Dr. Sarah Smith",
+      "specialty": "Cardiology",
+      "email": "sarah.smith@hospital.com",
+      "phone": "+1 (555) 123-4567",
+      "sessions": 1,
+      "avgEngagement": 99,
+      "totalTime": "0h 0m",
+      "status": "active",
+      "lastSession": "2025-06-17T03:54:49.293Z"
+    },
+    {
+      "id": "doctor-2",
+      "name": "Dr. Michael Johnson",
+      "specialty": "Endocrinology",
+      "email": "m.johnson@clinic.com",
+      "phone": "+1 (555) 234-5678",
+      "sessions": 0,
+      "avgEngagement": 0,
+      "totalTime": "0h 0m",
+      "status": "active"
+    }
+  ],
+  "presentations": [
+    {
+      "id": "presentation-1",
+      "title": "Cardiomax Treatment Protocol",
+      "description": "New cardiovascular medication protocol for hypertension patients",
+      "slides": 6,
+      "sessions": 1,
+      "avgEngagement": 99,
+      "status": "active",
+      "createdAt": "2025-06-17T03:54:24.962Z",
+      "lastUsed": "2025-06-17T03:54:49.293Z"
+    },
+    {
+      "id": "presentation-2",
+      "title": "Glucobalance Therapy",
+      "description": "Latest diabetes management medication and treatment guidelines",
+      "slides": 6,
+      "sessions": 0,
+      "avgEngagement": 0,
+      "status": "active",
+      "createdAt": "2025-06-17T03:54:24.962Z"
+    }
+  ],
+  "slides": [
+    {
+      "id": "slide-1-0",
+      "presentationId": "presentation-1",
+      "title": "Slide 1: Cardiomax Overview",
+      "content": "Cardiomax is a next-generation ACE inhibitor for hypertension management",
+      "imageUrl": "/slides/title.png",
+      "order": 0
+    },
+    {
+      "id": "slide-1-1",
+      "presentationId": "presentation-1",
+      "title": "Slide 2: Clinical Indications",
+      "content": "Primary indications include hypertension, heart failure, and post-MI treatment",
+      "imageUrl": "/slides/agenda.png",
+      "order": 1
+    },
+    {
+      "id": "slide-1-2",
+      "presentationId": "presentation-1",
+      "title": "Slide 3: Mechanism of Action",
+      "content": "Selectively blocks angiotensin II receptors with higher binding affinity",
+      "imageUrl": "/slides/about-us.png",
+      "order": 2
+    },
+    {
+      "id": "slide-1-3",
+      "presentationId": "presentation-1",
+      "title": "Slide 4: Dosage Guidelines",
+      "content": "Starting dose: 5mg daily, may increase to 10mg after 2 weeks",
+      "imageUrl": "/slides/product-overview.png",
+      "order": 3
+    },
+    {
+      "id": "slide-1-4",
+      "presentationId": "presentation-1",
+      "title": "Slide 5: Side Effects Profile",
+      "content": "Common side effects include dry cough (3%), dizziness (2%), and headache (1%)",
+      "imageUrl": "/slides/product-benefits.png",
+      "order": 4
+    },
+    {
+      "id": "slide-1-5",
+      "presentationId": "presentation-1",
+      "title": "Slide 6: Patient Outcomes",
+      "content": "Clinical trials show 24% reduction in cardiovascular events over 5 years",
+      "imageUrl": "/slides/market-overview.png",
+      "order": 5
+    },
+    {
+      "id": "slide-2-0",
+      "presentationId": "presentation-2",
+      "title": "Slide 1: Glucobalance Introduction",
+      "content": "Glucobalance is a dual SGLT2/GLP-1 inhibitor for type 2 diabetes",
+      "imageUrl": "/placeholder.svg?height=600&width=800&text=Glucobalance+Title",
+      "order": 0
+    },
+    {
+      "id": "slide-2-1",
+      "presentationId": "presentation-2",
+      "title": "Slide 2: Treatment Indications",
+      "content": "Indicated for adults with T2DM with inadequate control on metformin",
+      "imageUrl": "/placeholder.svg?height=600&width=800&text=Treatment+Agenda",
+      "order": 1
+    },
+    {
+      "id": "slide-2-2",
+      "presentationId": "presentation-2",
+      "title": "Slide 3: Pharmacodynamics",
+      "content": "Increases glucose excretion and improves insulin sensitivity",
+      "imageUrl": "/placeholder.svg?height=600&width=800&text=Company+Profile",
+      "order": 2
+    },
+    {
+      "id": "slide-2-3",
+      "presentationId": "presentation-2",
+      "title": "Slide 4: Administration Protocol",
+      "content": "Once-daily oral tablet, 25mg with or without food",
+      "imageUrl": "/placeholder.svg?height=600&width=800&text=Drug+Mechanism",
+      "order": 3
+    },
+    {
+      "id": "slide-2-4",
+      "presentationId": "presentation-2",
+      "title": "Slide 5: Adverse Reactions",
+      "content": "Monitor for hypoglycemia (2%), UTIs (4%), and dehydration (1%)",
+      "imageUrl": "/placeholder.svg?height=600&width=800&text=Clinical+Benefits",
+      "order": 4
+    },
+    {
+      "id": "slide-2-5",
+      "presentationId": "presentation-2",
+      "title": "Slide 6: Clinical Efficacy Data",
+      "content": "HbA1c reduction of 1.8% at 6 months compared to 0.9% with standard therapy",
+      "imageUrl": "/placeholder.svg?height=600&width=800&text=Market+Analysis",
+      "order": 5
+    }
+  ],
+  "sessions": [
+    {
+      "id": "732e3c44-4f8c-4d1a-b326-856d8bb29b62",
+      "doctorId": "doctor-1",
+      "presentationId": "presentation-1",
+      "startTime": "2025-06-17T03:54:24.963Z",
+      "endTime": "2025-06-17T03:54:49.293Z",
+      "totalTime": 24.33,
+      "avgEngagement": 99
+    }
+  ],
+  "slideAnalytics": [
+    {
+      "sessionId": "732e3c44-4f8c-4d1a-b326-856d8bb29b62",
+      "slideId": "slide-1-0",
+      "timeSpent": 2746,
+      "id": "c024ec81-856f-43f2-a716-42e83cb01cb4"
+    },
+    {
+      "sessionId": "732e3c44-4f8c-4d1a-b326-856d8bb29b62",
+      "slideId": "slide-1-1",
+      "timeSpent": 4298,
+      "id": "66c97f9e-7286-48c1-adaf-85216645a620"
+    },
+    {
+      "sessionId": "732e3c44-4f8c-4d1a-b326-856d8bb29b62",
+      "slideId": "slide-1-2",
+      "timeSpent": 4962,
+      "id": "834d75e1-f77c-4215-b643-89a6972159c5"
+    },
+    {
+      "sessionId": "732e3c44-4f8c-4d1a-b326-856d8bb29b62",
+      "slideId": "slide-1-3",
+      "timeSpent": 5534,
+      "id": "0758a55e-a6e9-44e0-8ee4-353ac24c78a5"
+    },
+    {
+      "sessionId": "732e3c44-4f8c-4d1a-b326-856d8bb29b62",
+      "slideId": "slide-1-4",
+      "timeSpent": 2589,
+      "id": "a475ab4d-768a-446b-ad25-2bee50ccd332"
+    },
+    {
+      "sessionId": "732e3c44-4f8c-4d1a-b326-856d8bb29b62",
+      "slideId": "slide-1-5",
+      "timeSpent": 3974,
+      "id": "e8d25f95-21b7-4988-9fdb-c5641c93dc25"
+    }
+  ]
+}

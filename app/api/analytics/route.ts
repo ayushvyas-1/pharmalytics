@@ -9,11 +9,11 @@ import {
 
 export async function GET() {
   try {
-    const doctors = getDoctors()
-    const presentations = getPresentations()
-    const recentSessions = getRecentSessions(50)
-    const topSlides = getTopPerformingSlides(20)
-    const allSlideAnalytics = getAllSlideAnalytics()
+    const doctors = await getDoctors()
+    const presentations = await getPresentations()
+    const recentSessions = await getRecentSessions(50)
+    const topSlides = await getTopPerformingSlides(20)
+    const allSlideAnalytics = await getAllSlideAnalytics()
 
     console.log('API Analytics Data:')
     console.log('- Doctors:', doctors.length)
