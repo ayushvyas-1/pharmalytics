@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { ChevronLeft, ChevronRight, Play, Pause, RotateCcw, Maximize, Minimize, Clock, User } from "lucide-react"
+import { ChevronLeft, ChevronRight, Play, Pause, RotateCcw, Maximize, Minimize, Home } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter, useSearchParams, useParams } from "next/navigation"
 import { getPresentationData, startPresentationSession, endPresentationSession } from "@/app/actions"
@@ -184,23 +185,33 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
     }
   }, [sessionStarted, isPresenting])
 
-  // Handle fullscreen
+  // Handle fullscreen and keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "f" || e.key === "F") {
         toggleFullscreen()
-      } else if (e.key === "ArrowRight") {
+      } else if (e.key === "ArrowRight" || e.key === " ") {
+        e.preventDefault()
         nextSlide()
       } else if (e.key === "ArrowLeft") {
+        e.preventDefault()
         prevSlide()
       } else if (e.key === "Escape" && fullscreen) {
         setFullscreen(false)
+      } else if (e.key === "Home") {
+        e.preventDefault()
+        recordSlideTime(currentSlide)
+        setCurrentSlide(0)
+      } else if (e.key === "End") {
+        e.preventDefault()
+        recordSlideTime(currentSlide)
+        setCurrentSlide(slides.length - 1)
       }
     }
 
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [fullscreen, currentSlide])
+  }, [fullscreen, currentSlide, slides.length])
 
   // Cleanup on unmount
   useEffect(() => {
@@ -296,13 +307,6 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
       setSessionData([])
       slideStartTimeRef.current = Date.now()
       setCurrentSlideTimeSpent(0)
-
-      const doctor = doctors.find((d) => d.id === doctorId)
-
-      toast({
-        title: "Session started",
-        description: `Presentation session started for ${doctor?.name || "doctor"}`,
-      })
     } else {
       toast({
         title: "Error",
@@ -357,14 +361,9 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
     const result = await endPresentationSession(sessionId, slideAnalytics)
 
     if (result.success) {
-      toast({
-        title: "Presentation completed",
-        description: `Analytics recorded for ${slideAnalytics.length} slides`,
-      })
-
       setTimeout(() => {
         router.push("/analytics")
-      }, 1500)
+      }, 500)
     } else {
       toast({
         title: "Error",
@@ -399,10 +398,16 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-black">
-        <div className="text-center text-white">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-300">Loading presentation...</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="text-center p-8">
+          <div className="relative">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600 mx-auto mb-6"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-8 h-8 bg-blue-600 rounded-full animate-pulse"></div>
+            </div>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">Loading presentation...</h2>
+          <p className="text-gray-600">Please wait while we prepare your slides</p>
         </div>
       </div>
     )
@@ -410,35 +415,44 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
 
   if (error || slides.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-900 to-black">
-        <Card className="w-full max-w-md bg-white/10 backdrop-blur-sm border-white/20">
-          <CardContent className="p-6">
-            <div className="text-center mb-6">
-              <h1 className="text-2xl font-bold mb-2 text-white">Error Loading Presentation</h1>
-              <p className="text-gray-300">{error || "No slides found for this presentation"}</p>
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-red-50 to-orange-100">
+        <Card className="w-full max-w-lg shadow-xl border-0">
+          <CardContent className="p-8">
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">⚠️</span>
+              </div>
+              <h1 className="text-2xl font-bold text-gray-800 mb-3">Unable to Load Presentation</h1>
+              <p className="text-gray-600">{error || "No slides found for this presentation"}</p>
             </div>
 
             {presentations.length > 0 && (
-              <div className="mb-4">
-                <h2 className="text-lg font-medium mb-2 text-white">Available Presentations:</h2>
-                <div className="space-y-2">
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold mb-4 text-gray-800">Available Presentations:</h2>
+                <div className="space-y-2 max-h-40 overflow-y-auto">
                   {presentations.map((presentation) => (
                     <Button
                       key={presentation.id}
                       variant="outline"
-                      className="w-full justify-start bg-white/10 border-white/20 text-white hover:bg-white/20"
+                      className="w-full justify-start p-3 h-auto text-left hover:bg-blue-50 border-gray-200"
                       onClick={() =>
                         router.push(`/viewer/${presentation.id}${doctorId ? `?doctorId=${doctorId}` : ""}`)
                       }
                     >
-                      {presentation.title}
+                      <div>
+                        <div className="font-medium">{presentation.title}</div>
+                        {presentation.description && (
+                          <div className="text-sm text-gray-500 mt-1">{presentation.description}</div>
+                        )}
+                      </div>
                     </Button>
                   ))}
                 </div>
               </div>
             )}
 
-            <Button onClick={() => router.push("/presentations")} className="w-full">
+            <Button onClick={() => router.push("/presentations")} className="w-full bg-blue-600 hover:bg-blue-700">
+              <Home className="h-4 w-4 mr-2" />
               Return to Presentations
             </Button>
           </CardContent>
@@ -451,45 +465,44 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
     const selectedDoctor = doctors.find(d => d.id === doctorId)
     
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex items-center justify-center p-4">
-        <Card className="w-full max-w-md bg-white/10 backdrop-blur-sm border-white/20 shadow-2xl">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
+        <Card className="w-full max-w-lg shadow-xl border-0 bg-white/80 backdrop-blur-sm">
           <CardContent className="p-8">
             <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Play className="h-8 w-8 text-white" />
+              <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Play className="h-10 w-10 text-blue-600" />
               </div>
-              <h1 className="text-2xl font-bold mb-2 text-white">Start Presentation</h1>
-              <p className="text-gray-300">Ready to present to your patient?</p>
+              <h1 className="text-3xl font-bold text-gray-800 mb-3">Ready to Present</h1>
+              <p className="text-gray-600">Start your presentation session when you're ready</p>
             </div>
 
             <div className="space-y-6">
-              {selectedDoctor && (
-                <div className="bg-white/5 p-4 rounded-lg border border-white/10">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                      <User className="h-5 w-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-white font-medium">Presenting to</p>
-                      <p className="text-gray-300 text-sm">{selectedDoctor.name}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="bg-white/5 p-4 rounded-lg border border-white/10">
-                <h2 className="font-medium text-lg mb-1 text-white">{presentation?.title || "Presentation"}</h2>
-                <p className="text-sm text-gray-300 mb-3">{presentation?.description || "Medical presentation"}</p>
-                <div className="flex items-center gap-2 text-sm text-gray-400">
-                  <Clock className="h-4 w-4" />
-                  <span>{slides.length} slides</span>
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200">
+                <h2 className="font-semibold text-xl mb-2 text-gray-800">{presentation?.title || "Presentation"}</h2>
+                <p className="text-gray-600 mb-4">{presentation?.description || "Medical presentation for patient education"}</p>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full font-medium">
+                    {slides.length} slides
+                  </span>
+                  <span className="text-gray-500">
+                    Est. {Math.ceil(slides.length * 2)} min
+                  </span>
                 </div>
               </div>
 
-              <Button onClick={startSession} className="w-full h-12 text-base font-medium bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700">
-                <Play className="h-5 w-5 mr-2" />
+              <Button onClick={startSession} className="w-full h-12 text-lg bg-blue-600 hover:bg-blue-700 shadow-lg">
+                <Play className="h-5 w-5 mr-3" />
                 Start Presentation
               </Button>
+
+              <div className="text-center">
+                <p className="text-sm text-gray-500 mb-2">Keyboard shortcuts:</p>
+                <div className="flex flex-wrap justify-center gap-2 text-xs text-gray-400">
+                  <span className="px-2 py-1 bg-gray-100 rounded">← → Navigate</span>
+                  <span className="px-2 py-1 bg-gray-100 rounded">F Fullscreen</span>
+                  <span className="px-2 py-1 bg-gray-100 rounded">Space Next</span>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -503,71 +516,104 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
 
   return (
     <div
-      className={`${fullscreen ? "fixed inset-0 z-50 bg-gray-900" : "min-h-screen bg-gray-900"} text-white`}
+      className={`${fullscreen ? "fixed inset-0 z-50 bg-black" : "min-h-screen bg-gray-900"} text-white transition-all duration-300`}
       ref={presentationRef}
     >
-      {/* Header */}
+      {/* Enhanced Header */}
       <div
-        className={`bg-gray-800/90 backdrop-blur-sm p-2 sm:p-4 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 ${
+        className={`bg-gray-800/95 backdrop-blur-sm border-b border-gray-700 p-3 sm:p-4 flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 ${
           fullscreen ? "hidden" : ""
         }`}
       >
-        <div className="flex items-center gap-2 sm:gap-4">
-          <span className="text-sm sm:text-base text-white font-medium">{presentation?.title || "Presentation"}</span>
-          <span className="text-xs sm:text-sm text-gray-400">
-            Slide {currentSlide + 1} of {slides.length}
-          </span>
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+            <span className="text-sm text-green-400 font-medium">LIVE</span>
+          </div>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-sm sm:text-base text-white font-semibold truncate">{presentation?.title || "Presentation"}</h1>
+            <p className="text-xs text-gray-400">
+              Slide {currentSlide + 1} of {slides.length} • {currentSlideData.title}
+            </p>
+          </div>
         </div>
 
-        <div className="flex items-center gap-1 sm:gap-2 justify-end">
-          <div className="hidden sm:flex items-center gap-2 text-xs text-gray-400 mr-2">
-            <Clock className="h-3 w-3" />
-            <span>{formatTime(totalSessionTime)}</span>
-          </div>
-          <Button variant="secondary" size="sm" onClick={() => setIsPresenting(!isPresenting)}>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setIsPresenting(!isPresenting)}
+            className="text-white hover:bg-gray-700"
+          >
             {isPresenting ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+            <span className="ml-2 hidden sm:inline">{isPresenting ? "Pause" : "Resume"}</span>
           </Button>
-          <Button variant="secondary" size="sm" onClick={toggleFullscreen}>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={toggleFullscreen}
+            className="text-white hover:bg-gray-700"
+          >
             {fullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
           </Button>
-          <Button variant="secondary" size="sm" onClick={resetSession}>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={resetSession}
+            className="text-white hover:bg-gray-700"
+          >
             <RotateCcw className="h-4 w-4" />
           </Button>
-          <Button variant="destructive" size="sm" onClick={endSession}>
-            End
+          <Button 
+            variant="destructive" 
+            size="sm" 
+            onClick={endSession}
+            className="bg-red-600 hover:bg-red-700"
+          >
+            End Session
           </Button>
         </div>
       </div>
 
-      {/* Progress bar */}
+      {/* Enhanced Progress bar */}
       <div className={`h-1 bg-gray-800 ${fullscreen ? "hidden" : ""}`}>
-        <div className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-300" style={{ width: `${slideProgress}%` }}></div>
+        <div 
+          className="h-full bg-gradient-to-r from-blue-500 to-blue-400 transition-all duration-500 ease-out shadow-sm" 
+          style={{ width: `${slideProgress}%` }}
+        ></div>
       </div>
 
-      {/* Main Slide Area - Full width presentation */}
-      <div className="flex-1 flex items-center justify-center p-2 sm:p-4 md:p-8">
-        <div className="max-w-5xl w-full">
+      {/* Enhanced Main Slide Area */}
+      <div className="flex-1 flex items-center justify-center p-2 sm:p-4 md:p-8 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+        <div className="max-w-6xl w-full">
           {isExternalImage ? (
-            <div className="relative w-full bg-white rounded-lg overflow-hidden shadow-2xl" style={{ height: fullscreen ? "85vh" : "70vh" }}>
+            <div className="relative w-full bg-white rounded-lg shadow-2xl overflow-hidden" style={{ height: fullscreen ? "85vh" : "75vh" }}>
               <Image
                 src={currentSlideData.imageUrl || "/placeholder.svg"}
                 alt={currentSlideData.title}
                 fill
                 style={{ objectFit: "contain" }}
                 priority
+                className="transition-opacity duration-300"
               />
             </div>
           ) : (
-            <Card className="bg-white text-black shadow-2xl">
-              <CardContent className="p-4 sm:p-8">
+            <Card className="bg-white text-black shadow-2xl border-0 overflow-hidden">
+              <CardContent className="p-6 sm:p-10">
                 <div className="text-center">
-                  <img
-                    src={currentSlideData.imageUrl || "/placeholder.svg"}
-                    alt={currentSlideData.title}
-                    className="w-full h-64 sm:h-96 object-cover rounded-lg mb-4 sm:mb-6 shadow-lg"
-                  />
-                  <h2 className="text-xl sm:text-3xl font-bold mb-2 sm:mb-4 text-gray-900">{currentSlideData.title}</h2>
-                  <p className="text-sm sm:text-lg text-gray-600">{currentSlideData.content}</p>
+                  <div className="relative mb-6 sm:mb-8 rounded-xl overflow-hidden shadow-lg bg-gray-50">
+                    <img
+                      src={currentSlideData.imageUrl || "/placeholder.svg"}
+                      alt={currentSlideData.title}
+                      className="w-full h-64 sm:h-96 object-cover transition-transform duration-300 hover:scale-105"
+                    />
+                  </div>
+                  <h2 className="text-2xl sm:text-4xl font-bold mb-3 sm:mb-6 text-gray-800 leading-tight">
+                    {currentSlideData.title}
+                  </h2>
+                  <p className="text-base sm:text-xl text-gray-600 leading-relaxed max-w-4xl mx-auto">
+                    {currentSlideData.content}
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -575,9 +621,9 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
         </div>
       </div>
 
-      {/* Navigation */}
+      {/* Enhanced Navigation */}
       <div
-        className={`bg-gray-800/90 backdrop-blur-sm p-2 sm:p-4 flex items-center justify-between ${
+        className={`bg-gray-800/95 backdrop-blur-sm border-t border-gray-700 p-3 sm:p-4 flex items-center justify-between ${
           fullscreen ? "fixed bottom-0 left-0 right-0" : ""
         }`}
       >
@@ -585,13 +631,13 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
           variant="outline" 
           onClick={prevSlide} 
           disabled={currentSlide === 0} 
-          className="text-xs sm:text-sm bg-white/10 border-white/20 text-white hover:bg-white/20"
+          className="text-white border-gray-600 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <ChevronLeft className="h-4 w-4 mr-0 sm:mr-2" />
           <span className="hidden sm:inline">Previous</span>
         </Button>
 
-        <div className="flex gap-1 sm:gap-2">
+        <div className="flex gap-1 sm:gap-2 px-4 max-w-xs sm:max-w-none overflow-x-auto">
           {slides.map((_, index) => (
             <button
               key={index}
@@ -599,8 +645,12 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
                 recordSlideTime(currentSlide)
                 setCurrentSlide(index)
               }}
-              className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-colors ${
-                index === currentSlide ? "bg-blue-500" : "bg-gray-600 hover:bg-gray-500"
+              className={`w-3 h-3 sm:w-4 sm:h-4 rounded-full transition-all duration-200 flex-shrink-0 ${
+                index === currentSlide 
+                  ? "bg-blue-500 scale-125 shadow-lg" 
+                  : index < currentSlide 
+                    ? "bg-blue-300 hover:bg-blue-400" 
+                    : "bg-gray-600 hover:bg-gray-500"
               }`}
               aria-label={`Go to slide ${index + 1}`}
             />
@@ -611,8 +661,9 @@ export default function ViewerPage({ params }: { params: { id: string } }) {
           variant="outline"
           onClick={nextSlide}
           disabled={currentSlide === slides.length - 1}
-          className="text-xs sm:text-sm bg-white/10 border-white/20 text-white hover:bg-white/20"
+          className="text-white border-gray-600 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
+          <span className="hidden sm:inline">Next</span>
           <span className="hidden sm:inline">Next</span>
           <ChevronRight className="h-4 w-4 ml-0 sm:ml-2" />
         </Button>

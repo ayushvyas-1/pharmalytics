@@ -275,7 +275,7 @@ export default function AnalyticsPage() {
       return acc;
     }, []);
 
-    allSlides.forEach((slide) => {
+    allSlides.forEach((slide: { id: string; }) => {
       slideTimeMap.set(slide.id, { timeSpent: 0, views: 0 });
     });
 
@@ -298,7 +298,7 @@ export default function AnalyticsPage() {
 
     // Convert map to array and join with slide data
     return allSlides
-      .map((slide) => {
+      .map((slide: { id: string; }) => {
         const stats = slideTimeMap.get(slide.id) || { timeSpent: 0, views: 0 };
         return {
           slide,
@@ -307,7 +307,7 @@ export default function AnalyticsPage() {
           views: stats.views,
         };
       })
-      .sort((a, b) => b.totalTimeSpent - a.totalTimeSpent);
+      .sort((a: { totalTimeSpent: number; }, b: { totalTimeSpent: number; }) => b.totalTimeSpent - a.totalTimeSpent);
   };
 
   // Get slide analytics for the selected presentation or all presentations

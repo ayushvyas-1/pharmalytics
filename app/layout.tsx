@@ -23,9 +23,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <SidebarProvider>
-          <div className="flex min-h-screen">
+          <div className="flex min-h-screen w-full">
             <AppSidebar />
-            <main className="flex-1">{children}</main>
+            <main className="flex flex-1 flex-col w-full relative">{children}</main>
           </div>
         </SidebarProvider>
         <Toaster />

@@ -6,11 +6,11 @@
       "specialty": "Cardiology",
       "email": "sarah.smith@hospital.com",
       "phone": "+1 (555) 123-4567",
-      "sessions": 5,
-      "avgEngagement": 84,
-      "totalTime": "0h 2m",
+      "sessions": 2,
+      "avgEngagement": 100,
+      "totalTime": "0h 1m",
       "status": "active",
-      "lastSession": "2025-06-17T04:37:00.724Z"
+      "lastSession": "2025-06-18T03:23:15.797Z"
     },
     {
       "id": "doctor-2",
@@ -30,11 +30,11 @@
       "title": "Cardiomax Treatment Protocol",
       "description": "New cardiovascular medication protocol for hypertension patients",
       "slides": 6,
-      "sessions": 5,
-      "avgEngagement": 84,
+      "sessions": 2,
+      "avgEngagement": 100,
       "status": "active",
-      "createdAt": "2025-06-17T03:54:24.962Z",
-      "lastUsed": "2025-06-17T04:37:00.724Z"
+      "createdAt": "2025-06-17T08:45:24.963Z",
+      "lastUsed": "2025-06-18T03:23:15.797Z"
     },
     {
       "id": "presentation-2",
@@ -44,7 +44,7 @@
       "sessions": 0,
       "avgEngagement": 0,
       "status": "active",
-      "createdAt": "2025-06-17T03:54:24.962Z"
+      "createdAt": "2025-06-17T08:45:24.963Z"
     }
   ],
   "slides": [
@@ -147,204 +147,96 @@
   ],
   "sessions": [
     {
-      "id": "732e3c44-4f8c-4d1a-b326-856d8bb29b62",
+      "id": "f0af7163-1cf8-46c0-8afa-dae2be32c4c6",
       "doctorId": "doctor-1",
       "presentationId": "presentation-1",
-      "startTime": "2025-06-17T03:54:24.963Z",
-      "endTime": "2025-06-17T03:54:49.293Z",
-      "totalTime": 24.33,
+      "startTime": "2025-06-17T08:45:51.402Z",
+      "endTime": "2025-06-17T08:46:19.732Z",
+      "totalTime": 28.33,
       "avgEngagement": 99
     },
     {
-      "id": "6cea2bc9-7c73-4179-b859-41500fdea301",
+      "id": "874deafe-aca2-46f4-a630-7307295af05d",
       "doctorId": "doctor-1",
       "presentationId": "presentation-1",
-      "startTime": "2025-06-17T04:35:46.740Z",
-      "endTime": "2025-06-17T04:37:00.724Z",
-      "totalTime": 73.984,
-      "avgEngagement": 68
+      "startTime": "2025-06-18T03:22:54.229Z",
+      "endTime": "2025-06-18T03:23:15.797Z",
+      "totalTime": 21.568,
+      "avgEngagement": 100
     }
   ],
   "slideAnalytics": [
     {
-      "sessionId": "732e3c44-4f8c-4d1a-b326-856d8bb29b62",
+      "sessionId": "f0af7163-1cf8-46c0-8afa-dae2be32c4c6",
       "slideId": "slide-1-0",
-      "timeSpent": 2746,
-      "id": "c024ec81-856f-43f2-a716-42e83cb01cb4"
+      "timeSpent": 7629,
+      "id": "b807176b-2446-4d2a-b4ed-5dcd40199032"
     },
     {
-      "sessionId": "732e3c44-4f8c-4d1a-b326-856d8bb29b62",
+      "sessionId": "f0af7163-1cf8-46c0-8afa-dae2be32c4c6",
       "slideId": "slide-1-1",
-      "timeSpent": 4298,
-      "id": "66c97f9e-7286-48c1-adaf-85216645a620"
+      "timeSpent": 15625,
+      "id": "f56e50d9-93bc-4c7d-b44a-b82ad3f898a9"
     },
     {
-      "sessionId": "732e3c44-4f8c-4d1a-b326-856d8bb29b62",
+      "sessionId": "f0af7163-1cf8-46c0-8afa-dae2be32c4c6",
       "slideId": "slide-1-2",
-      "timeSpent": 4962,
-      "id": "834d75e1-f77c-4215-b643-89a6972159c5"
+      "timeSpent": 794,
+      "id": "62f74f56-09ba-4590-864a-7d1aeab15ae8"
     },
     {
-      "sessionId": "732e3c44-4f8c-4d1a-b326-856d8bb29b62",
+      "sessionId": "f0af7163-1cf8-46c0-8afa-dae2be32c4c6",
       "slideId": "slide-1-3",
-      "timeSpent": 5534,
-      "id": "0758a55e-a6e9-44e0-8ee4-353ac24c78a5"
+      "timeSpent": 824,
+      "id": "f5c4c2a2-04b3-4532-bd3a-737bdeec0b25"
     },
     {
-      "sessionId": "732e3c44-4f8c-4d1a-b326-856d8bb29b62",
+      "sessionId": "f0af7163-1cf8-46c0-8afa-dae2be32c4c6",
       "slideId": "slide-1-4",
-      "timeSpent": 2589,
-      "id": "a475ab4d-768a-446b-ad25-2bee50ccd332"
+      "timeSpent": 944,
+      "id": "eb667ab6-4f13-4c86-a0f1-bd701480dbae"
     },
     {
-      "sessionId": "732e3c44-4f8c-4d1a-b326-856d8bb29b62",
+      "sessionId": "f0af7163-1cf8-46c0-8afa-dae2be32c4c6",
       "slideId": "slide-1-5",
-      "timeSpent": 3974,
-      "id": "e8d25f95-21b7-4988-9fdb-c5641c93dc25"
+      "timeSpent": 2322,
+      "id": "c560d33f-4e39-48f0-b33f-c2f4cf3bc570"
     },
     {
-      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
+      "sessionId": "874deafe-aca2-46f4-a630-7307295af05d",
       "slideId": "slide-1-0",
-      "timeSpent": 1774,
-      "id": "5581ac1e-5ac0-4dad-8258-e5c36688e98d"
+      "timeSpent": 3665,
+      "id": "3132398a-b052-41fd-8789-d6c31d6f70d6"
     },
     {
-      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
+      "sessionId": "874deafe-aca2-46f4-a630-7307295af05d",
       "slideId": "slide-1-1",
-      "timeSpent": 2601,
-      "id": "729649fa-8396-4160-b840-f7a71a704bfb"
+      "timeSpent": 4420,
+      "id": "220b2736-4915-415d-ab4d-cbf04314c986"
     },
     {
-      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
+      "sessionId": "874deafe-aca2-46f4-a630-7307295af05d",
       "slideId": "slide-1-2",
-      "timeSpent": 3950,
-      "id": "1b8bb11e-5104-4925-b281-882293bf1d71"
+      "timeSpent": 8391,
+      "id": "dc35d22e-eb0a-4663-99a0-346bff3445ac"
     },
     {
-      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
+      "sessionId": "874deafe-aca2-46f4-a630-7307295af05d",
       "slideId": "slide-1-3",
-      "timeSpent": 5027,
-      "id": "1dab4ef9-df28-47a7-b4bd-cb7f05f54418"
+      "timeSpent": 1206,
+      "id": "7ed371e1-a092-4895-8fce-c1d5663e816d"
     },
     {
-      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
+      "sessionId": "874deafe-aca2-46f4-a630-7307295af05d",
       "slideId": "slide-1-4",
-      "timeSpent": 968,
-      "id": "71c00f56-8bc3-46fd-b1f2-93d9f6ad9d9c"
+      "timeSpent": 1866,
+      "id": "0f097b73-d600-4892-af4f-6154dea76ecb"
     },
     {
-      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
+      "sessionId": "874deafe-aca2-46f4-a630-7307295af05d",
       "slideId": "slide-1-5",
-      "timeSpent": 1747,
-      "id": "ae1fbcdc-9db1-4c50-adbf-1e4ca0203ff0"
-    },
-    {
-      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
-      "slideId": "slide-1-0",
-      "timeSpent": 1774,
-      "id": "808577d9-a452-4596-91be-8f148bc868da"
-    },
-    {
-      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
-      "slideId": "slide-1-1",
-      "timeSpent": 2601,
-      "id": "4cc092f8-ca74-4887-82c4-6902de7f7afe"
-    },
-    {
-      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
-      "slideId": "slide-1-2",
-      "timeSpent": 3950,
-      "id": "507cef92-d47f-4375-aaf6-4b248eeb842b"
-    },
-    {
-      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
-      "slideId": "slide-1-3",
-      "timeSpent": 5027,
-      "id": "a924c6d3-1ef8-4cd8-bebe-a3e575e230cf"
-    },
-    {
-      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
-      "slideId": "slide-1-4",
-      "timeSpent": 968,
-      "id": "42f5c75a-cf87-4c63-b46e-048455a07eb1"
-    },
-    {
-      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
-      "slideId": "slide-1-5",
-      "timeSpent": 10307,
-      "id": "073d3d46-4f8b-4467-a361-7f24579e57e4"
-    },
-    {
-      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
-      "slideId": "slide-1-0",
-      "timeSpent": 1774,
-      "id": "f093192b-bedd-495f-9ec9-ec50e1f950d9"
-    },
-    {
-      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
-      "slideId": "slide-1-1",
-      "timeSpent": 2601,
-      "id": "942ef007-c3d3-4d85-9e18-ba5343b2f32e"
-    },
-    {
-      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
-      "slideId": "slide-1-2",
-      "timeSpent": 3950,
-      "id": "dcb275ba-8583-4f07-81b7-5e113f7079e0"
-    },
-    {
-      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
-      "slideId": "slide-1-3",
-      "timeSpent": 5027,
-      "id": "0c9a1b1e-9c1a-4b3e-a639-5320929e9d2a"
-    },
-    {
-      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
-      "slideId": "slide-1-4",
-      "timeSpent": 968,
-      "id": "a1593c35-f70a-40f0-b0d8-c2be826dd700"
-    },
-    {
-      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
-      "slideId": "slide-1-5",
-      "timeSpent": 15249,
-      "id": "4250e660-3eb3-417b-9247-6fe72c9c4c12"
-    },
-    {
-      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
-      "slideId": "slide-1-0",
-      "timeSpent": 1774,
-      "id": "e567ca03-6735-45e8-beff-2970484509e8"
-    },
-    {
-      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
-      "slideId": "slide-1-1",
-      "timeSpent": 2601,
-      "id": "ca9d9d9f-9013-4fcc-a237-0000af654acf"
-    },
-    {
-      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
-      "slideId": "slide-1-2",
-      "timeSpent": 3950,
-      "id": "90c80c76-3ca5-40f9-85f6-b74ddb0d5cce"
-    },
-    {
-      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
-      "slideId": "slide-1-3",
-      "timeSpent": 5027,
-      "id": "e451585d-6f4b-4997-90cd-15bb9a4c9ed5"
-    },
-    {
-      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
-      "slideId": "slide-1-4",
-      "timeSpent": 968,
-      "id": "18358ada-0b99-4b6a-b284-ae09ab789390"
-    },
-    {
-      "sessionId": "6cea2bc9-7c73-4179-b859-41500fdea301",
-      "slideId": "slide-1-5",
-      "timeSpent": 35988,
-      "id": "b134074c-b755-4aaf-b787-176f79f04216"
+      "timeSpent": 1948,
+      "id": "93c525e2-17bb-4f3c-a2a9-5b2b34071eac"
     }
   ]
 }

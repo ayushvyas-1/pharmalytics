@@ -1,12 +1,28 @@
+"use client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { User, Eye, Mail, Phone, ArrowRight } from "lucide-react"
 import { getDoctors } from "@/lib/db"
 import Link from "next/link"
+import { useEffect, useState } from "react"
 
 export default function DoctorsPage() {
-  const doctors = getDoctors()
+  
+  const [doctors, setDoctors] = useState<any[]>([])
+ 
+  useEffect(() => {
+      async function loadInitialData() {
+        try {
+          const doctorsData = await getDoctors();
+          setDoctors(doctorsData)
+
+        } catch (error) {
+          console.error('Error loading initial data:', error)
+        }
+      }
+      loadInitialData()
+    }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">

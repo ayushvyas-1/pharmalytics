@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { SidebarTrigger } from "@/components/ui/sidebar"
-import { Users, Presentation, Play, BarChart3, ArrowRight, TrendingUp } from "lucide-react"
+import { Users, Presentation, Play, BarChart3, TrendingUp, Calendar, Clock, Target } from "lucide-react"
 import { Doctor, Presentation as PresentationType } from "@/lib/db"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -44,16 +44,16 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
-        <div className="p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30">
+        <div className="w-full max-w-none px-6 py-6">
           <div className="flex items-center gap-4 mb-8">
             <SidebarTrigger />
-            <div className="h-8 w-48 bg-gray-200 rounded-lg animate-pulse" />
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Sales Rep Dashboard
+            </h1>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded-xl animate-pulse" />
-            ))}
+          <div className="flex items-center justify-center h-96">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
         </div>
       </div>
@@ -62,21 +62,18 @@ export default function Dashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
-        <div className="p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30">
+        <div className="w-full max-w-none px-6 py-6">
           <div className="flex items-center gap-4 mb-8">
             <SidebarTrigger />
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Sales Rep Dashboard
             </h1>
           </div>
-          <div className="flex items-center justify-center h-64">
+          <div className="flex items-center justify-center h-96">
             <div className="text-center">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <BarChart3 className="w-8 h-8 text-red-600" />
-              </div>
-              <p className="text-red-600 font-medium mb-2">Error loading dashboard</p>
-              <p className="text-gray-500 text-sm">{error}</p>
+              <div className="text-red-500 text-lg font-medium mb-2">Error Loading Dashboard</div>
+              <div className="text-gray-600">{error}</div>
             </div>
           </div>
         </div>
@@ -85,145 +82,199 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
-      <div className="p-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/30">
+      <div className="w-full max-w-none px-6 py-6">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <SidebarTrigger />
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-              Sales Rep Dashboard
-            </h1>
-            <p className="text-gray-500 mt-1">Manage presentations and track doctor engagement</p>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-4">
+            <SidebarTrigger />
+            <div>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Sales Rep Dashboard
+              </h1>
+              <p className="text-gray-600 mt-1">Welcome back! Track your presentation performance and engage with doctors.</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg" asChild>
+              <Link href="/start">
+                <Play className="h-4 w-4 mr-2" />
+                Start New Presentation
+              </Link>
+            </Button>
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <Card className="stat-card group">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600">Available Doctors</CardTitle>
-              <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                <Users className="h-5 w-5 text-blue-600" />
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+          <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-700">Available Doctors</CardTitle>
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Users className="h-4 w-4 text-blue-600" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-900 mb-1">{doctors.length}</div>
-              <p className="text-xs text-gray-500 flex items-center gap-1">
-                <TrendingUp className="h-3 w-3" />
-                Ready for presentations
+              <div className="text-3xl font-bold text-gray-900">{doctors.length}</div>
+              <p className="text-xs text-gray-500 flex items-center mt-1">
+                <TrendingUp className="h-3 w-3 mr-1" />
+                Doctors to present to
               </p>
             </CardContent>
           </Card>
 
-          <Card className="stat-card group">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600">Presentations</CardTitle>
-              <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center group-hover:bg-green-100 transition-colors">
-                <Presentation className="h-5 w-5 text-green-600" />
+          <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-700">Presentations</CardTitle>
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <Presentation className="h-4 w-4 text-purple-600" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-900 mb-1">{presentations.length}</div>
-              <p className="text-xs text-gray-500 flex items-center gap-1">
-                <TrendingUp className="h-3 w-3" />
-                Available content
+              <div className="text-3xl font-bold text-gray-900">{presentations.length}</div>
+              <p className="text-xs text-gray-500 flex items-center mt-1">
+                <Target className="h-3 w-3 mr-1" />
+                Available presentations
               </p>
             </CardContent>
           </Card>
 
-          <Card className="stat-card group">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-              <CardTitle className="text-sm font-medium text-gray-600">Total Sessions</CardTitle>
-              <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center group-hover:bg-purple-100 transition-colors">
-                <BarChart3 className="h-5 w-5 text-purple-600" />
+          <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-700">Total Sessions</CardTitle>
+              <div className="p-2 bg-green-100 rounded-lg">
+                <BarChart3 className="h-4 w-4 text-green-600" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-gray-900 mb-1">{totalSessions}</div>
-              <p className="text-xs text-gray-500 flex items-center gap-1">
-                <TrendingUp className="h-3 w-3" />
+              <div className="text-3xl font-bold text-gray-900">{totalSessions}</div>
+              <p className="text-xs text-gray-500 flex items-center mt-1">
+                <Calendar className="h-3 w-3 mr-1" />
                 Presentations delivered
               </p>
             </CardContent>
           </Card>
+
+          <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-gray-700">Success Rate</CardTitle>
+              <div className="p-2 bg-orange-100 rounded-lg">
+                <TrendingUp className="h-4 w-4 text-orange-600" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-gray-900">
+                {totalSessions > 0 ? Math.round((totalSessions / (doctors.length * presentations.length)) * 100) : 0}%
+              </div>
+              <p className="text-xs text-gray-500 flex items-center mt-1">
+                <Clock className="h-3 w-3 mr-1" />
+                Engagement rate
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Quick Actions */}
-          <Card className="action-card">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-xl font-semibold text-gray-900">Quick Actions</CardTitle>
-              <CardDescription className="text-gray-500">
-                Start presenting to doctors and track engagement
-              </CardDescription>
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          {/* Quick Actions - Full Width on Mobile, 1/3 on Desktop */}
+          <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 xl:col-span-1">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold text-gray-900">Quick Actions</CardTitle>
+              <CardDescription className="text-gray-600">Start presenting to doctors</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button asChild className="w-full h-12 text-base font-medium" size="lg">
-                <Link href="/start" className="flex items-center justify-center gap-2">
-                  <Play className="h-5 w-5" />
+              <Button asChild className="w-full h-14 text-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg">
+                <Link href="/start">
+                  <Play className="h-5 w-5 mr-3" />
                   Start New Presentation
-                  <ArrowRight className="h-4 w-4 ml-auto" />
                 </Link>
               </Button>
 
-              <div className="grid grid-cols-2 gap-3">
-                <Button variant="outline" asChild className="h-11">
-                  <Link href="/doctors" className="flex items-center gap-2">
-                    <Users className="h-4 w-4" />
-                    Doctors
+              <div className="grid grid-cols-1 gap-3">
+                <Button variant="outline" asChild className="h-12 hover:bg-blue-50 hover:border-blue-300 transition-all duration-200">
+                  <Link href="/doctors">
+                    <Users className="h-4 w-4 mr-2" />
+                    View All Doctors
                   </Link>
                 </Button>
-                <Button variant="outline" asChild className="h-11">
-                  <Link href="/presentations" className="flex items-center gap-2">
-                    <Presentation className="h-4 w-4" />
-                    Content
+                <Button variant="outline" asChild className="h-12 hover:bg-purple-50 hover:border-purple-300 transition-all duration-200">
+                  <Link href="/presentations">
+                    <Presentation className="h-4 w-4 mr-2" />
+                    View Presentations
+                  </Link>
+                </Button>
+                <Button variant="outline" asChild className="h-12 hover:bg-green-50 hover:border-green-300 transition-all duration-200">
+                  <Link href="/analytics">
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    View Analytics
                   </Link>
                 </Button>
               </div>
             </CardContent>
           </Card>
 
-          {/* Available Doctors */}
-          <Card className="action-card">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-xl font-semibold text-gray-900">Available Doctors</CardTitle>
-              <CardDescription className="text-gray-500">
-                Select a doctor to present to
-              </CardDescription>
+          {/* Available Doctors - 2/3 Width on Desktop */}
+          <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0 xl:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold text-gray-900">Available Doctors</CardTitle>
+              <CardDescription className="text-gray-600">Select a doctor to present to</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {doctors.slice(0, 4).map((doctor) => (
-                  <div key={doctor.id} className="flex items-center justify-between p-4 bg-gray-50/50 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                        <span className="text-white font-medium text-sm">
-                          {doctor.name.split(' ').map(n => n[0]).join('')}
-                        </span>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {doctors.map((doctor) => (
+                  <div key={doctor.id} className="group p-4 border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all duration-300 bg-gradient-to-r from-white to-gray-50/50">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold">
+                            {doctor.name.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
+                              {doctor.name}
+                            </p>
+                            <p className="text-sm text-gray-500">{doctor.specialty}</p>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium text-gray-900">{doctor.name}</p>
-                        <p className="text-sm text-gray-500">{doctor.specialty}</p>
-                      </div>
+                      <Button 
+                        size="sm" 
+                        asChild 
+                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-sm ml-4"
+                      >
+                        <Link href={`/start?doctorId=${doctor.id}`}>
+                          <Play className="h-3 w-3 mr-1" />
+                          Present
+                        </Link>
+                      </Button>
                     </div>
-                    <Button size="sm" asChild className="h-8">
-                      <Link href={`/start?doctorId=${doctor.id}`}>
-                        Present
-                      </Link>
-                    </Button>
                   </div>
                 ))}
-                
-                {doctors.length > 4 && (
-                  <Button variant="ghost" asChild className="w-full mt-2">
-                    <Link href="/doctors" className="flex items-center gap-2">
-                      View all doctors
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                )}
+              </div>
+              
+              {doctors.length === 0 && (
+                <div className="text-center py-12">
+                  <Users className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500 text-lg">No doctors available</p>
+                  <p className="text-gray-400 text-sm mt-1">Add doctors to start presenting</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Recent Activity Section */}
+        <div className="mt-8">
+          <Card className="bg-white/80 backdrop-blur-sm shadow-lg border-0">
+            <CardHeader>
+              <CardTitle className="text-xl font-bold text-gray-900">Recent Activity</CardTitle>
+              <CardDescription className="text-gray-600">Your latest presentation sessions</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-12">
+                <Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500 text-lg">No recent activity</p>
+                <p className="text-gray-400 text-sm mt-1">Start your first presentation to see activity here</p>
               </div>
             </CardContent>
           </Card>

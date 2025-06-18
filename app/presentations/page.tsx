@@ -1,12 +1,26 @@
+"use client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Play, Presentation, ArrowRight, FileText } from "lucide-react"
 import Link from "next/link"
 import { getPresentations } from "@/lib/db"
+import { useEffect, useState } from "react"
 
 export default function PresentationsPage() {
-  const presentations = getPresentations()
+  const [presentations, setPresentations] = useState<any[]>([])
+    
+  useEffect(() => {
+    async function loadInitialData() {
+      try {
+        const presentationsData = await getPresentations();
+        setPresentations(presentationsData)
+      } catch (error) {
+        console.error('Error loading initial data:', error)
+      }
+    }
+    loadInitialData()
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
