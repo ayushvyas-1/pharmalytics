@@ -4,7 +4,6 @@
 import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { ChevronLeft, ChevronRight, Play, Pause, RotateCcw, Maximize, Minimize, Clock, User } from "lucide-react"
 import { ChevronLeft, ChevronRight, Play, Pause, RotateCcw, Maximize, Minimize, Home } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter, useSearchParams, useParams } from "next/navigation"
