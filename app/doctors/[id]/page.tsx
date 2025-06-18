@@ -127,6 +127,7 @@ export default function DoctorPresentationsPage({ params }: { params: { id: stri
                   <CardTitle className="text-lg">{presentation.title}</CardTitle>
                   <CardDescription className="mt-2">{presentation.description}</CardDescription>
                 </div>
+                </div>
               </CardHeader>
               
               <CardContent className="space-y-4">
@@ -150,7 +151,7 @@ export default function DoctorPresentationsPage({ params }: { params: { id: stri
           ))}
         </div>
 
-        {presentations.length === 0 && (
+        {presentation.length === 0 && (
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
